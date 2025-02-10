@@ -1,0 +1,4 @@
+id,photo,number,name,type,amenities,price,offerPrice,status
+#0001234,perfil.jpg,91234,Deluxe A,Double Bed,AC, Shower, Double Bed, Towel, Bathup, Coffee Set, LED TV, Wifi,125,80,Available
+#000123458,perfil.jpg,91234,Deluxe A,Double Bed,AC, Shower, Double Bed, Towel, Bathup, Coffee Set, LED TV, Wifi,145,90,Available
+#000123457,perfil.jpg,91234,Deluxe A,Double Bed,AC, Shower, Double Bed, Towel, Bathup, Coffee Set, LED TV, Wifi,160,100,Booked
