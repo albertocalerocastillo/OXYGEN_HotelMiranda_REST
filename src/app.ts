@@ -1,15 +1,29 @@
 import express, { Request, Response } from 'express';
-import { getRooms, getRoom } from './controllers/rooms.controller';
+import { roomRoutes, roomEndpoint } from './controllers/rooms.controller';
+import { bookingRoutes, bookingEndpoint } from './controllers/bookings.controller';
+import { authMiddleware } from './middleware/auth';
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+
+app.use(express.json());
+
+app.use('/rooms', authMiddleware, roomRoutes);
+app.use('/bookings', authMiddleware, bookingRoutes);
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('¡Hola Mundo desde Express con TypeScript!');
+  const hotelData = {
+    name: 'Hotel Miranda',
+    endpoints: [
+      roomEndpoint,
+      bookingEndpoint
+    ]
+  };
+  res.json(hotelData);
 });
-
-app.get('/rooms/:id', getRoom);
 
 app.listen(port, () => {
-  console.log(`Servidor escuchando en el puerto ${port}`);
+  console.log(`Servidor escuchando en el puerto ${port}`);
 });
+
+require('dotenv').config();

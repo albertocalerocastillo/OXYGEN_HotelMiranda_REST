@@ -1,10 +1,10 @@
 import express, { Request, Response } from 'express';
-import { getRooms, getRoom, createRoom, updateRoom, deleteRoom } from '../services/room.service';
+import { getBookings, getBooking, createBooking, updateBooking, deleteBooking } from '../services/booking.service';
 
-export const getRoomsController = async (req: Request, res: Response) => {
+export const getBookingsController = async (req: Request, res: Response) => {
   try {
-    const rooms = await getRooms();
-    res.json(rooms);
+    const bookings = await getBookings();
+    res.json(bookings);
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error(error.message);
@@ -16,13 +16,13 @@ export const getRoomsController = async (req: Request, res: Response) => {
   }
 };
 
-export const getRoomController = async (req: Request, res: Response) => {
+export const getBookingController = async (req: Request, res: Response) => {
   try {
-    const room = await getRoom(req.params.id);
-    if (!room) {
-      return res.status(404).json({ message: 'Habitación no encontrada' });
+    const booking = await getBooking(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ message: 'Reserva no encontrada' });
     }
-    res.json(room);
+    res.json(booking);
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error(error.message);
@@ -34,11 +34,11 @@ export const getRoomController = async (req: Request, res: Response) => {
   }
 };
 
-export const createRoomController = async (req: Request, res: Response) => {
+export const createBookingController = async (req: Request, res: Response) => {
   try {
-    const room = req.body;
-    await createRoom(room);
-    res.status(201).json({ message: 'Habitación creada con éxito' });
+    const booking = req.body;
+    await createBooking(booking);
+    res.status(201).json({ message: 'Reserva creada con éxito' });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error(error.message);
@@ -50,12 +50,12 @@ export const createRoomController = async (req: Request, res: Response) => {
   }
 };
 
-export const updateRoomController = async (req: Request, res: Response) => {
+export const updateBookingController = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const updatedRoom = req.body;
-    await updateRoom(id, updatedRoom);
-    res.status(200).json({ message: 'Habitación actualizada con éxito' });
+    const updatedBooking = req.body;
+    await updateBooking(id, updatedBooking);
+    res.status(200).json({ message: 'Reserva actualizada con éxito' });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error(error.message);
@@ -67,11 +67,11 @@ export const updateRoomController = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteRoomController = async (req: Request, res: Response) => {
+export const deleteBookingController = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    await deleteRoom(id);
-    res.status(200).json({ message: 'Habitación eliminada con éxito' });
+    await deleteBooking(id);
+    res.status(200).json({ message: 'Reserva eliminada con éxito' });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error(error.message);
@@ -85,16 +85,16 @@ export const deleteRoomController = async (req: Request, res: Response) => {
 
 const router = express.Router();
 
-router.get('/', getRoomsController);
-router.get('/:id', getRoomController);
-router.post('/', createRoomController);
-router.put('/:id', updateRoomController);
-router.delete('/:id', deleteRoomController);
+router.get('/', getBookingsController);
+router.get('/:id', getBookingController);
+router.post('/', createBookingController);
+router.put('/:id', updateBookingController);
+router.delete('/:id', deleteBookingController);
 
-export const roomRoutes = router;
+export const bookingRoutes = router;
 
-export const roomEndpoint = {
-  path: '/rooms',
+export const bookingEndpoint = {
+  path: '/bookings',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   private: true
 };
