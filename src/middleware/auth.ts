@@ -1,8 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { verifyToken } from '../services/auth.service';
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -10,18 +7,23 @@ declare module 'express-serve-static-core' {
   }
 }
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers['authorization'];
+export const authMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = req.headers['authorization']?.replace('Bearer ', '');
 
   if (!token) {
     return res.status(403).json({ message: 'No token provided' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET as string, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-    req.user = decoded;
-    next();
-  });
+  const userId = verifyToken(token);
+
+  if (!userId) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  req.user = { id: userId };
+  next();
 };

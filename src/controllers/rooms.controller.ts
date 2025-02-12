@@ -1,18 +1,22 @@
 import express, { Request, Response } from 'express';
 import { getRooms, getRoom, createRoom, updateRoom, deleteRoom } from '../services/room.service';
 
+const handleErrors = (res: Response, error: unknown) => {
+  if (error instanceof Error) {
+    console.error(error.message);
+    res.status(500).json({ message: error.message });
+  } else {
+    console.error('Error desconocido:', error);
+    res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
+  }
+};
+
 export const getRoomsController = async (req: Request, res: Response) => {
   try {
     const rooms = await getRooms();
     res.json(rooms);
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error(error.message);
-      res.status(500).json({ message: error.message });
-    } else {
-      console.error('Error desconocido:', error);
-      res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
-    }
+    handleErrors(res, error);
   }
 };
 
@@ -24,13 +28,7 @@ export const getRoomController = async (req: Request, res: Response) => {
     }
     res.json(room);
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error(error.message);
-      res.status(500).json({ message: error.message });
-    } else {
-      console.error('Error desconocido:', error);
-      res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
-    }
+    handleErrors(res, error);
   }
 };
 
@@ -40,13 +38,7 @@ export const createRoomController = async (req: Request, res: Response) => {
     await createRoom(room);
     res.status(201).json({ message: 'Habitación creada con éxito' });
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error(error.message);
-      res.status(500).json({ message: error.message });
-    } else {
-      console.error('Error desconocido:', error);
-      res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
-    }
+    handleErrors(res, error);
   }
 };
 
@@ -57,13 +49,7 @@ export const updateRoomController = async (req: Request, res: Response) => {
     await updateRoom(id, updatedRoom);
     res.status(200).json({ message: 'Habitación actualizada con éxito' });
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error(error.message);
-      res.status(500).json({ message: error.message });
-    } else {
-      console.error('Error desconocido:', error);
-      res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
-    }
+    handleErrors(res, error);
   }
 };
 
@@ -73,13 +59,7 @@ export const deleteRoomController = async (req: Request, res: Response) => {
     await deleteRoom(id);
     res.status(200).json({ message: 'Habitación eliminada con éxito' });
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error(error.message);
-      res.status(500).json({ message: error.message });
-    } else {
-      console.error('Error desconocido:', error);
-      res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
-    }
+    handleErrors(res, error);
   }
 };
 

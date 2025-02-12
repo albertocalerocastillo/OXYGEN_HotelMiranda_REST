@@ -7,9 +7,11 @@ const express_1 = __importDefault(require("express"));
 const rooms_controller_1 = require("./controllers/rooms.controller");
 const bookings_controller_1 = require("./controllers/bookings.controller");
 const auth_1 = require("./middleware/auth");
+const login_controller_1 = require("./controllers/login.controller");
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3000;
 app.use(express_1.default.json());
+app.post('/login', login_controller_1.login);
 app.use('/rooms', auth_1.authMiddleware, rooms_controller_1.roomRoutes);
 app.use('/bookings', auth_1.authMiddleware, bookings_controller_1.bookingRoutes);
 app.get('/', (req, res) => {
