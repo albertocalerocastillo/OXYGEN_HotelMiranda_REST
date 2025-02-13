@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { getContacts, getContact, createContact, updateContact, deleteContact } from '../services/contact.service';
+import { validateCreateContact } from '../middleware/contact.middleware';
 
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
@@ -180,7 +181,7 @@ const router = express.Router();
 
 router.get('/', getContactsController);
 router.get('/:id', getContactController);
-router.post('/', createContactController);
+router.post('/', validateCreateContact, createContactController);
 router.put('/:id', updateContactController);
 router.delete('/:id', deleteContactController);
 

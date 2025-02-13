@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { getRooms, getRoom, createRoom, updateRoom, deleteRoom } from '../services/room.service';
+import { validateCreateRoom, validateUpdateRoom } from '../middleware/room.middleware';
 
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
@@ -180,8 +181,8 @@ const router = express.Router();
 
 router.get('/', getRoomsController);
 router.get('/:id', getRoomController);
-router.post('/', createRoomController);
-router.put('/:id', updateRoomController);
+router.post('/', validateCreateRoom, createRoomController);
+router.put('/:id', validateUpdateRoom, updateRoomController);
 router.delete('/:id', deleteRoomController);
 
 export const roomRoutes = router;

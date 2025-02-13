@@ -36,7 +36,7 @@ const swaggerOptions = {
           photo: { type: 'string', description: 'URL de la foto de la habitación' },
           number: { type: 'string', description: 'Número de la habitación' },
           name: { type: 'string', description: 'Nombre de la habitación' },
-          type: { type: 'string', description: 'Tipo de habitación (e.g., Double Bed)' },
+          type: { type: 'string', description: 'Tipo de habitación (Double Bed)' },
           amenities: { type: 'string', description: 'Comodidades de la habitación' },
           price: { type: 'number', format: 'float', description: 'Precio por noche' },
           offerPrice: { type: 'number', format: 'float', description: 'Precio de oferta' },

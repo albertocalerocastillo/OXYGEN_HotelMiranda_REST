@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { getUsers, getUser, createUser, updateUser, deleteUser } from '../services/user.service';
+import { validateCreateUser, validateUpdateUser } from '../middleware/user.middleware';
 
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
@@ -180,8 +181,8 @@ const router = express.Router();
 
 router.get('/', getUsersController);
 router.get('/:id', getUserController);
-router.post('/', createUserController);
-router.put('/:id', updateUserController);
+router.post('/', validateCreateUser, createUserController);
+router.put('/:id', validateUpdateUser, updateUserController);
 router.delete('/:id', deleteUserController);
 
 export const userRoutes = router;
