@@ -6,6 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.roomEndpoint = exports.roomRoutes = exports.deleteRoomController = exports.updateRoomController = exports.createRoomController = exports.getRoomController = exports.getRoomsController = void 0;
 const express_1 = __importDefault(require("express"));
 const room_service_1 = require("../services/room.service");
+/**
+ * Función para manejar errores y enviar respuestas con código de error 500
+ * @param res
+ * @param error
+ */
 const handleErrors = (res, error) => {
     if (error instanceof Error) {
         console.error(error.message);
@@ -16,6 +21,24 @@ const handleErrors = (res, error) => {
         res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
     }
 };
+/**
+ * @swagger
+ * tags:
+ *   name: Rooms
+ *   description: Operaciones relacionadas con las habitaciones
+ */
+/**
+ * @swagger
+ * /rooms:
+ *   get:
+ *     summary: Obtiene todas las habitaciones
+ *     tags: [Rooms]
+ *     responses:
+ *       200:
+ *         description: Lista de habitaciones
+ *       500:
+ *         description: Error del servidor
+ */
 const getRoomsController = async (req, res) => {
     try {
         const rooms = await (0, room_service_1.getRooms)();
@@ -26,6 +49,27 @@ const getRoomsController = async (req, res) => {
     }
 };
 exports.getRoomsController = getRoomsController;
+/**
+ * @swagger
+ * /rooms/{id}:
+ *   get:
+ *     summary: Obtiene una habitación por ID
+ *     tags: [Rooms]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de la habitación
+ *     responses:
+ *       200:
+ *         description: Datos de la habitación
+ *       404:
+ *         description: Habitación no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
 const getRoomController = async (req, res) => {
     try {
         const room = await (0, room_service_1.getRoom)(req.params.id);
@@ -39,6 +83,25 @@ const getRoomController = async (req, res) => {
     }
 };
 exports.getRoomController = getRoomController;
+/**
+ * @swagger
+ * /rooms:
+ *   post:
+ *     summary: Crea una nueva habitación
+ *     tags: [Rooms]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               // Define las propiedades del objeto de habitación aquí
+ *     responses:
+ *       201:
+ *         description: Habitación creada con éxito
+ *       500:
+ *         description: Error del servidor
+ */
 const createRoomController = async (req, res) => {
     try {
         const room = req.body;
@@ -50,6 +113,34 @@ const createRoomController = async (req, res) => {
     }
 };
 exports.createRoomController = createRoomController;
+/**
+ * @swagger
+ * /rooms/{id}:
+ *   put:
+ *     summary: Actualiza una habitación existente
+ *     tags: [Rooms]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de la habitación
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               // Define las propiedades del objeto de habitación aquí
+ *     responses:
+ *       200:
+ *         description: Habitación actualizada con éxito
+ *       404:
+ *         description: Habitación no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
 const updateRoomController = async (req, res) => {
     try {
         const id = req.params.id;
@@ -62,6 +153,27 @@ const updateRoomController = async (req, res) => {
     }
 };
 exports.updateRoomController = updateRoomController;
+/**
+ * @swagger
+ * /rooms/{id}:
+ *   delete:
+ *     summary: Elimina una habitación
+ *     tags: [Rooms]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de la habitación
+ *     responses:
+ *       200:
+ *         description: Habitación eliminada con éxito
+ *       404:
+ *         description: Habitación no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
 const deleteRoomController = async (req, res) => {
     try {
         const id = req.params.id;

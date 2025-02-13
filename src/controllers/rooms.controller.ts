@@ -1,6 +1,11 @@
 import express, { Request, Response } from 'express';
 import { getRooms, getRoom, createRoom, updateRoom, deleteRoom } from '../services/room.service';
 
+/**
+ * Función para manejar errores y enviar respuestas con código de error 500
+ * @param res 
+ * @param error 
+ */
 const handleErrors = (res: Response, error: unknown) => {
   if (error instanceof Error) {
     console.error(error.message);
@@ -11,6 +16,25 @@ const handleErrors = (res: Response, error: unknown) => {
   }
 };
 
+/**
+ * @swagger
+ * tags:
+ *   name: Rooms
+ *   description: Operaciones relacionadas con las habitaciones
+ */
+
+/**
+ * @swagger
+ * /rooms:
+ *   get:
+ *     summary: Obtiene todas las habitaciones
+ *     tags: [Rooms]
+ *     responses:
+ *       200:
+ *         description: Lista de habitaciones
+ *       500:
+ *         description: Error del servidor
+ */
 export const getRoomsController = async (req: Request, res: Response) => {
   try {
     const rooms = await getRooms();
@@ -20,6 +44,27 @@ export const getRoomsController = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * @swagger
+ * /rooms/{id}:
+ *   get:
+ *     summary: Obtiene una habitación por ID
+ *     tags: [Rooms]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de la habitación
+ *     responses:
+ *       200:
+ *         description: Datos de la habitación
+ *       404:
+ *         description: Habitación no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
 export const getRoomController = async (req: Request, res: Response) => {
   try {
     const room = await getRoom(req.params.id);
@@ -32,6 +77,25 @@ export const getRoomController = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * @swagger
+ * /rooms:
+ *   post:
+ *     summary: Crea una nueva habitación
+ *     tags: [Rooms]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               // Define las propiedades del objeto de habitación aquí
+ *     responses:
+ *       201:
+ *         description: Habitación creada con éxito
+ *       500:
+ *         description: Error del servidor
+ */
 export const createRoomController = async (req: Request, res: Response) => {
   try {
     const room = req.body;
@@ -42,6 +106,34 @@ export const createRoomController = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * @swagger
+ * /rooms/{id}:
+ *   put:
+ *     summary: Actualiza una habitación existente
+ *     tags: [Rooms]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de la habitación
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               // Define las propiedades del objeto de habitación aquí
+ *     responses:
+ *       200:
+ *         description: Habitación actualizada con éxito
+ *       404:
+ *         description: Habitación no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
 export const updateRoomController = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
@@ -53,6 +145,27 @@ export const updateRoomController = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * @swagger
+ * /rooms/{id}:
+ *   delete:
+ *     summary: Elimina una habitación
+ *     tags: [Rooms]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de la habitación
+ *     responses:
+ *       200:
+ *         description: Habitación eliminada con éxito
+ *       404:
+ *         description: Habitación no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
 export const deleteRoomController = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;

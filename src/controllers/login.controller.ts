@@ -4,6 +4,37 @@ import {
   generateToken,
 } from '../services/auth.service';
 
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Inicia sesión de usuario
+ *     tags: [Authentication]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Token de autenticación
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *       401:
+ *         description: Credenciales inválidas
+ *       500:
+ *         description: Error del servidor
+ */
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 

@@ -1,6 +1,25 @@
 import express, { Request, Response } from 'express';
 import { getBookings, getBooking, createBooking, updateBooking, deleteBooking } from '../services/booking.service';
 
+/**
+ * @swagger
+ * tags:
+ *   name: Bookings
+ *   description: Operaciones relacionadas con las reservas
+ */
+
+/**
+ * @swagger
+ * /bookings:
+ *   get:
+ *     summary: Obtiene todas las reservas
+ *     tags: [Bookings]
+ *     responses:
+ *       200:
+ *         description: Lista de reservas
+ *       500:
+ *         description: Error del servidor
+ */
 export const getBookingsController = async (req: Request, res: Response) => {
   try {
     const bookings = await getBookings();
@@ -16,6 +35,27 @@ export const getBookingsController = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * @swagger
+ * /bookings/{id}:
+ *   get:
+ *     summary: Obtiene una reserva por ID
+ *     tags: [Bookings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de la reserva
+ *     responses:
+ *       200:
+ *         description: Datos de la reserva
+ *       404:
+ *         description: Reserva no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
 export const getBookingController = async (req: Request, res: Response) => {
   try {
     const booking = await getBooking(req.params.id);
@@ -34,6 +74,25 @@ export const getBookingController = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * @swagger
+ * /bookings:
+ *   post:
+ *     summary: Crea una nueva reserva
+ *     tags: [Bookings]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               // Define las propiedades del objeto de reserva aquí
+ *     responses:
+ *       201:
+ *         description: Reserva creada con éxito
+ *       500:
+ *         description: Error del servidor
+ */
 export const createBookingController = async (req: Request, res: Response) => {
   try {
     const booking = req.body;
@@ -50,6 +109,34 @@ export const createBookingController = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * @swagger
+ * /bookings/{id}:
+ *   put:
+ *     summary: Actualiza una reserva existente
+ *     tags: [Bookings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de la reserva
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               // Define las propiedades del objeto de reserva aquí
+ *     responses:
+ *       200:
+ *         description: Reserva actualizada con éxito
+ *       404:
+ *         description: Reserva no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
 export const updateBookingController = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
@@ -67,6 +154,27 @@ export const updateBookingController = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * @swagger
+ * /bookings/{id}:
+ *   delete:
+ *     summary: Elimina una reserva
+ *     tags: [Bookings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de la reserva
+ *     responses:
+ *       200:
+ *         description: Reserva eliminada con éxito
+ *       404:
+ *         description: Reserva no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
 export const deleteBookingController = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
