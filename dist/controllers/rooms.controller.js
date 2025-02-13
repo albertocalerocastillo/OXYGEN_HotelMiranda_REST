@@ -5,7 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.roomEndpoint = exports.roomRoutes = exports.deleteRoomController = exports.updateRoomController = exports.createRoomController = exports.getRoomController = exports.getRoomsController = void 0;
 const express_1 = __importDefault(require("express"));
+const uuid_1 = require("uuid");
 const room_service_1 = require("../services/room.service");
+const room_middleware_1 = require("../middleware/room.middleware");
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
  * @param res
@@ -14,7 +16,12 @@ const room_service_1 = require("../services/room.service");
 const handleErrors = (res, error) => {
     if (error instanceof Error) {
         console.error(error.message);
-        res.status(500).json({ message: error.message });
+        if (error.message === 'Habitación no encontrada') {
+            res.status(404).json({ message: error.message });
+        }
+        else {
+            res.status(500).json({ message: error.message });
+        }
     }
     else {
         console.error('Error desconocido:', error);
@@ -104,9 +111,22 @@ exports.getRoomController = getRoomController;
  */
 const createRoomController = async (req, res) => {
     try {
-        const room = req.body;
-        await (0, room_service_1.createRoom)(room);
-        res.status(201).json({ message: 'Habitación creada con éxito' });
+        const roomData = req.body;
+        const defaultRoom = {
+            photo: "",
+            number: "",
+            name: "",
+            type: "",
+            amenities: "",
+            price: 0,
+            offerPrice: 0,
+            status: "",
+            description: "",
+            capacity: 0,
+        };
+        const newRoom = { ...defaultRoom, ...roomData, id: (0, uuid_1.v4)() };
+        const createdRoom = await (0, room_service_1.createRoom)(newRoom);
+        res.status(201).json({ message: 'Habitación creada con éxito', id: createdRoom.id });
     }
     catch (error) {
         handleErrors(res, error);
@@ -188,8 +208,8 @@ exports.deleteRoomController = deleteRoomController;
 const router = express_1.default.Router();
 router.get('/', exports.getRoomsController);
 router.get('/:id', exports.getRoomController);
-router.post('/', exports.createRoomController);
-router.put('/:id', exports.updateRoomController);
+router.post('/', room_middleware_1.validateCreateRoom, exports.createRoomController);
+router.put('/:id', room_middleware_1.validateUpdateRoom, exports.updateRoomController);
 router.delete('/:id', exports.deleteRoomController);
 exports.roomRoutes = router;
 exports.roomEndpoint = {

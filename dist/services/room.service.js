@@ -51,7 +51,7 @@ const getRoom = async (id) => {
     try {
         const data = await fs.promises.readFile(ROOMS_FILE, 'utf8');
         const rooms = JSON.parse(data);
-        return rooms.find(r => r.id === id);
+        return rooms.find(r => String(r.id) === id);
     }
     catch (error) {
         console.error(error);
@@ -65,6 +65,7 @@ const createRoom = async (room) => {
         const rooms = JSON.parse(data);
         rooms.push(room);
         await fs.promises.writeFile(ROOMS_FILE, JSON.stringify(rooms, null, 2));
+        return room;
     }
     catch (error) {
         console.error(error);
@@ -76,15 +77,20 @@ const updateRoom = async (id, updatedRoom) => {
     try {
         const data = await fs.promises.readFile(ROOMS_FILE, 'utf8');
         const rooms = JSON.parse(data);
-        const index = rooms.findIndex(r => r.id === id);
+        const index = rooms.findIndex(r => String(r.id) === id);
         if (index === -1) {
             throw new Error('Habitación no encontrada');
         }
         rooms[index] = { ...rooms[index], ...updatedRoom };
-        await fs.promises.writeFile(ROOMS_FILE, JSON.stringify(rooms, null, 2));
+        try {
+            await fs.promises.writeFile(ROOMS_FILE, JSON.stringify(rooms, null, 2));
+        }
+        catch (error) {
+            throw new Error('Error al actualizar la habitación');
+        }
     }
     catch (error) {
-        console.error(error);
+        console.error("Error al actualizar la habitación:", error);
         throw new Error('Error al actualizar la habitación');
     }
 };

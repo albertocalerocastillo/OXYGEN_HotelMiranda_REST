@@ -6,6 +6,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.bookingEndpoint = exports.bookingRoutes = exports.deleteBookingController = exports.updateBookingController = exports.createBookingController = exports.getBookingController = exports.getBookingsController = void 0;
 const express_1 = __importDefault(require("express"));
 const booking_service_1 = require("../services/booking.service");
+const booking_middleware_1 = require("../middleware/booking.middleware");
+/**
+ * Función para manejar errores y enviar respuestas con código de error 500
+ * @param res
+ * @param error
+ */
+const handleErrors = (res, error) => {
+    if (error instanceof Error) {
+        console.error(error.message);
+        res.status(500).json({ message: error.message });
+    }
+    else {
+        console.error('Error desconocido:', error);
+        res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
+    }
+};
 /**
  * @swagger
  * tags:
@@ -30,14 +46,7 @@ const getBookingsController = async (req, res) => {
         res.json(bookings);
     }
     catch (error) {
-        if (error instanceof Error) {
-            console.error(error.message);
-            res.status(500).json({ message: error.message });
-        }
-        else {
-            console.error('Error desconocido:', error);
-            res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
-        }
+        handleErrors(res, error);
     }
 };
 exports.getBookingsController = getBookingsController;
@@ -71,14 +80,7 @@ const getBookingController = async (req, res) => {
         res.json(booking);
     }
     catch (error) {
-        if (error instanceof Error) {
-            console.error(error.message);
-            res.status(500).json({ message: error.message });
-        }
-        else {
-            console.error('Error desconocido:', error);
-            res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
-        }
+        handleErrors(res, error);
     }
 };
 exports.getBookingController = getBookingController;
@@ -108,14 +110,7 @@ const createBookingController = async (req, res) => {
         res.status(201).json({ message: 'Reserva creada con éxito' });
     }
     catch (error) {
-        if (error instanceof Error) {
-            console.error(error.message);
-            res.status(500).json({ message: error.message });
-        }
-        else {
-            console.error('Error desconocido:', error);
-            res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
-        }
+        handleErrors(res, error);
     }
 };
 exports.createBookingController = createBookingController;
@@ -155,14 +150,7 @@ const updateBookingController = async (req, res) => {
         res.status(200).json({ message: 'Reserva actualizada con éxito' });
     }
     catch (error) {
-        if (error instanceof Error) {
-            console.error(error.message);
-            res.status(500).json({ message: error.message });
-        }
-        else {
-            console.error('Error desconocido:', error);
-            res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
-        }
+        handleErrors(res, error);
     }
 };
 exports.updateBookingController = updateBookingController;
@@ -194,21 +182,14 @@ const deleteBookingController = async (req, res) => {
         res.status(200).json({ message: 'Reserva eliminada con éxito' });
     }
     catch (error) {
-        if (error instanceof Error) {
-            console.error(error.message);
-            res.status(500).json({ message: error.message });
-        }
-        else {
-            console.error('Error desconocido:', error);
-            res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
-        }
+        handleErrors(res, error);
     }
 };
 exports.deleteBookingController = deleteBookingController;
 const router = express_1.default.Router();
 router.get('/', exports.getBookingsController);
 router.get('/:id', exports.getBookingController);
-router.post('/', exports.createBookingController);
+router.post('/', booking_middleware_1.validateCreateBooking, exports.createBookingController);
 router.put('/:id', exports.updateBookingController);
 router.delete('/:id', exports.deleteBookingController);
 exports.bookingRoutes = router;

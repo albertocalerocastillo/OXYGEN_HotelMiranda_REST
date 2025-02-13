@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userEndpoint = exports.userRoutes = exports.deleteUserController = exports.updateUserController = exports.createUserController = exports.getUserController = exports.getUsersController = void 0;
 const express_1 = __importDefault(require("express"));
 const user_service_1 = require("../services/user.service");
+const user_middleware_1 = require("../middleware/user.middleware");
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
  * @param res
@@ -188,8 +189,8 @@ exports.deleteUserController = deleteUserController;
 const router = express_1.default.Router();
 router.get('/', exports.getUsersController);
 router.get('/:id', exports.getUserController);
-router.post('/', exports.createUserController);
-router.put('/:id', exports.updateUserController);
+router.post('/', user_middleware_1.validateCreateUser, exports.createUserController);
+router.put('/:id', user_middleware_1.validateUpdateUser, exports.updateUserController);
 router.delete('/:id', exports.deleteUserController);
 exports.userRoutes = router;
 exports.userEndpoint = {

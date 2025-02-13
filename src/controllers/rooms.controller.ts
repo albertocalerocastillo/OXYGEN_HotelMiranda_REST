@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import { getRooms, getRoom, createRoom, updateRoom, deleteRoom } from '../services/room.service';
 import { validateCreateRoom, validateUpdateRoom } from '../middleware/room.middleware';
 
@@ -10,7 +11,11 @@ import { validateCreateRoom, validateUpdateRoom } from '../middleware/room.middl
 const handleErrors = (res: Response, error: unknown) => {
   if (error instanceof Error) {
     console.error(error.message);
-    res.status(500).json({ message: error.message });
+    if (error.message === 'Habitación no encontrada') {
+      res.status(404).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: error.message });
+    }
   } else {
     console.error('Error desconocido:', error);
     res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
@@ -99,11 +104,29 @@ export const getRoomController = async (req: Request, res: Response) => {
  */
 export const createRoomController = async (req: Request, res: Response) => {
   try {
-    const room = req.body;
-    await createRoom(room);
-    res.status(201).json({ message: 'Habitación creada con éxito' });
+      const roomData = req.body;
+
+      const defaultRoom = {
+          photo: "",
+          number: "",
+          name: "",
+          type: "",
+          amenities: "",
+          price: 0,
+          offerPrice: 0,
+          status: "",
+          description: "",
+          capacity: 0,
+      };
+
+      const newRoom = { ...defaultRoom, ...roomData, id: uuidv4() };
+
+      const createdRoom = await createRoom(newRoom);
+
+      res.status(201).json({ message: 'Habitación creada con éxito', id: createdRoom.id });
+
   } catch (error: unknown) {
-    handleErrors(res, error);
+      handleErrors(res, error);
   }
 };
 
@@ -137,12 +160,12 @@ export const createRoomController = async (req: Request, res: Response) => {
  */
 export const updateRoomController = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id;
-    const updatedRoom = req.body;
-    await updateRoom(id, updatedRoom);
-    res.status(200).json({ message: 'Habitación actualizada con éxito' });
+      const id = req.params.id;
+      const updatedRoom = req.body;
+      await updateRoom(id, updatedRoom);
+      res.status(200).json({ message: 'Habitación actualizada con éxito' });
   } catch (error: unknown) {
-    handleErrors(res, error);
+      handleErrors(res, error);
   }
 };
 

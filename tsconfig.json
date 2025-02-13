@@ -12,7 +12,8 @@
       "@/*": ["*"]
     },
     "types": [
-      "express"
+      "express",
+      "jest"
     ]
   },
   "include": [

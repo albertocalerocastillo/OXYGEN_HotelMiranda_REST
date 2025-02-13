@@ -39,11 +39,11 @@ const swaggerOptions = {
                     photo: { type: 'string', description: 'URL de la foto de la habitación' },
                     number: { type: 'string', description: 'Número de la habitación' },
                     name: { type: 'string', description: 'Nombre de la habitación' },
-                    type: { type: 'string', description: 'Tipo de habitación (e.g., Double Bed)' },
+                    type: { type: 'string', description: 'Tipo de habitación (Double Bed)' },
                     amenities: { type: 'string', description: 'Comodidades de la habitación' },
                     price: { type: 'number', format: 'float', description: 'Precio por noche' },
                     offerPrice: { type: 'number', format: 'float', description: 'Precio de oferta' },
-                    status: { type: 'string', description: 'Estado de la habitación (e.g., Available)' }
+                    status: { type: 'string', description: 'Estado de la habitación (Available)' }
                 }
             },
             Booking: {
@@ -58,7 +58,7 @@ const swaggerOptions = {
                     checkOutTime: { type: 'string', description: 'Hora de check-out' },
                     specialRequest: { type: 'string', description: 'Solicitud especial' },
                     roomType: { type: 'string', description: 'Tipo de habitación reservada' },
-                    status: { type: 'string', description: 'Estado de la reserva (e.g., Booked, Refund, Pending, Canceled)' },
+                    status: { type: 'string', description: 'Estado de la reserva (Booked, Refund, Pending, Canceled)' },
                     specialRequestType: { type: 'string', description: 'Tipo de solicitud especial' }
                 }
             },
@@ -84,7 +84,7 @@ const swaggerOptions = {
                     joinDate: { type: 'string', description: 'Fecha de ingreso del usuario' },
                     jobDesk: { type: 'string', description: 'Descripción del puesto de trabajo del usuario' },
                     contact: { type: 'string', description: 'Información de contacto del usuario' },
-                    status: { type: 'string', description: 'Estado del usuario (e.g., ACTIVE, INACTIVE)' },
+                    status: { type: 'string', description: 'Estado del usuario (ACTIVE, INACTIVE)' },
                     profilePhoto: { type: 'string', description: 'URL de la foto de perfil del usuario' },
                     password: { type: 'string', description: 'Contraseña del usuario' }
                 }
@@ -116,3 +116,4 @@ app.listen(port, () => {
     console.log(`Servidor escuchando en el puerto ${port}`);
 });
 require('dotenv').config();
+exports.default = app;

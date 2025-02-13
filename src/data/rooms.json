@@ -31,5 +31,31 @@
     "price": 145,
     "offerPrice": 90,
     "status": "Available"
+  },
+  {
+    "photo": "",
+    "number": "",
+    "name": "Habitación de prueba",
+    "type": "",
+    "amenities": "",
+    "price": 100,
+    "offerPrice": 0,
+    "status": "",
+    "description": "...",
+    "capacity": 2,
+    "id": "4b4c38c6-7046-433d-b036-61f6b24db32d"
+  },
+  {
+    "photo": "",
+    "number": "",
+    "name": "Habitación de prueba",
+    "type": "",
+    "amenities": "",
+    "price": 100,
+    "offerPrice": 0,
+    "status": "",
+    "description": "...",
+    "capacity": 2,
+    "id": "ca14334f-9aa7-414a-90e8-d8a5131538a9"
   }
 ]

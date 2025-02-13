@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.contactEndpoint = exports.contactRoutes = exports.deleteContactController = exports.updateContactController = exports.createContactController = exports.getContactController = exports.getContactsController = void 0;
 const express_1 = __importDefault(require("express"));
 const contact_service_1 = require("../services/contact.service");
+const contact_middleware_1 = require("../middleware/contact.middleware");
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
  * @param res
@@ -188,7 +189,7 @@ exports.deleteContactController = deleteContactController;
 const router = express_1.default.Router();
 router.get('/', exports.getContactsController);
 router.get('/:id', exports.getContactController);
-router.post('/', exports.createContactController);
+router.post('/', contact_middleware_1.validateCreateContact, exports.createContactController);
 router.put('/:id', exports.updateContactController);
 router.delete('/:id', exports.deleteContactController);
 exports.contactRoutes = router;

@@ -120,3 +120,5 @@ app.listen(port, () => {
 });
 
 require('dotenv').config();
+
+export default app;
