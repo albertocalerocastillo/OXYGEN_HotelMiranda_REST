@@ -115,7 +115,7 @@ const createRoomController = async (req, res) => {
         const defaultRoom = {
             photo: "",
             number: "",
-            name: "",
+            name: "aa",
             type: "",
             amenities: "",
             price: 0,

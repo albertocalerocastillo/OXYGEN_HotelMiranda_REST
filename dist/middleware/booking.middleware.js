@@ -10,3 +10,4 @@ const validateCreateBooking = (req, res, next) => {
     next();
 };
 exports.validateCreateBooking = validateCreateBooking;
+//quitar los middleware y ponerlo en controllers

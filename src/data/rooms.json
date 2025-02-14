@@ -57,5 +57,18 @@
     "description": "...",
     "capacity": 2,
     "id": "ca14334f-9aa7-414a-90e8-d8a5131538a9"
+  },
+  {
+    "photo": "",
+    "number": "",
+    "name": "Habitación de prueba",
+    "type": "",
+    "amenities": "",
+    "price": 100,
+    "offerPrice": 0,
+    "status": "",
+    "description": "...",
+    "capacity": 2,
+    "id": "f65408e6-b2a2-45eb-a322-f6a67a4f0880"
   }
 ]

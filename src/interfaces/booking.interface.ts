@@ -7,7 +7,7 @@ export interface Booking {
     checkOutDate: string;
     checkOutTime: string;
     specialRequest: string;
-    roomType: string;
+    roomType: string; //relacionarlo q sea un objeto con rooms
     status: string;
     specialRequestType: string;
   }

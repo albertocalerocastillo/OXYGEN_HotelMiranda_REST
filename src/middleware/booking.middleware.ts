@@ -8,3 +8,5 @@ export const validateCreateBooking = (req: Request, res: Response, next: NextFun
   }
   next();
 };
+
+//quitar los middleware y ponerlo en controllers

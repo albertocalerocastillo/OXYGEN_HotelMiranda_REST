@@ -109,7 +109,7 @@ export const createRoomController = async (req: Request, res: Response) => {
       const defaultRoom = {
           photo: "",
           number: "",
-          name: "",
+          name: "aa",
           type: "",
           amenities: "",
           price: 0,

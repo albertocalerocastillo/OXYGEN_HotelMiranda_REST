@@ -3,6 +3,8 @@ import * as fs from 'fs';
 
 const CONTACTS_FILE = './src/data/contact.json';
 
+//hacerlo con clases
+
 export const getContacts = async (): Promise<Contact[]> => {
   try {
     const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');

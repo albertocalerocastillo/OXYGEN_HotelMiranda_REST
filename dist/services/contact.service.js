@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteContact = exports.updateContact = exports.createContact = exports.getContact = exports.getContacts = void 0;
 const fs = __importStar(require("fs"));
 const CONTACTS_FILE = './src/data/contact.json';
+//hacerlo con clases
 const getContacts = async () => {
     try {
         const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
