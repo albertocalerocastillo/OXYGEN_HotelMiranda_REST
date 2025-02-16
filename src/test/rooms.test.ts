@@ -27,7 +27,7 @@ describe('Rooms API', () => {
             expect(response.status).toBe(200);
             expect(response.body).toBeInstanceOf(Array);
         });
-    });
+    }); 
 
     describe('GET /rooms/:id', () => {
         it('should return a room by ID', async () => {
