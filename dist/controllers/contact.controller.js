@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.contactEndpoint = exports.contactRoutes = exports.deleteContactController = exports.updateContactController = exports.createContactController = exports.getContactController = exports.getContactsController = void 0;
 const express_1 = __importDefault(require("express"));
 const contact_service_1 = require("../services/contact.service");
-const contact_middleware_1 = require("../middleware/contact.middleware");
+const contact_validator_1 = require("../validators/contact.validator");
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
  * @param res
@@ -42,7 +42,7 @@ const handleErrors = (res, error) => {
  */
 const getContactsController = async (req, res) => {
     try {
-        const contacts = await (0, contact_service_1.getContacts)();
+        const contacts = await contact_service_1.contactService.getContacts();
         res.json(contacts);
     }
     catch (error) {
@@ -73,7 +73,7 @@ exports.getContactsController = getContactsController;
  */
 const getContactController = async (req, res) => {
     try {
-        const contact = await (0, contact_service_1.getContact)(req.params.id);
+        const contact = await contact_service_1.contactService.getContact(req.params.id);
         if (!contact) {
             return res.status(404).json({ message: 'Contacto no encontrado' });
         }
@@ -100,13 +100,19 @@ exports.getContactController = getContactController;
  *     responses:
  *       201:
  *         description: Contacto creado con éxito
+ *       400:
+ *         description: Error de validación
  *       500:
  *         description: Error del servidor
  */
 const createContactController = async (req, res) => {
     try {
+        const { error } = contact_validator_1.validateContactCreate.validate(req.body);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
         const contact = req.body;
-        await (0, contact_service_1.createContact)(contact);
+        await contact_service_1.contactService.createContact(contact);
         res.status(201).json({ message: 'Contacto creado con éxito' });
     }
     catch (error) {
@@ -137,6 +143,8 @@ exports.createContactController = createContactController;
  *     responses:
  *       200:
  *         description: Contacto actualizado con éxito
+ *       400:
+ *         description: Error de validación
  *       404:
  *         description: Contacto no encontrado
  *       500:
@@ -146,7 +154,11 @@ const updateContactController = async (req, res) => {
     try {
         const id = req.params.id;
         const updatedContact = req.body;
-        await (0, contact_service_1.updateContact)(id, updatedContact);
+        const { error } = contact_validator_1.validateContactCreate.validate(updatedContact);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+        await contact_service_1.contactService.updateContact(id, updatedContact);
         res.status(200).json({ message: 'Contacto actualizado con éxito' });
     }
     catch (error) {
@@ -178,7 +190,7 @@ exports.updateContactController = updateContactController;
 const deleteContactController = async (req, res) => {
     try {
         const id = req.params.id;
-        await (0, contact_service_1.deleteContact)(id);
+        await contact_service_1.contactService.deleteContact(id);
         res.status(200).json({ message: 'Contacto eliminado con éxito' });
     }
     catch (error) {
@@ -189,7 +201,7 @@ exports.deleteContactController = deleteContactController;
 const router = express_1.default.Router();
 router.get('/', exports.getContactsController);
 router.get('/:id', exports.getContactController);
-router.post('/', contact_middleware_1.validateCreateContact, exports.createContactController);
+router.post('/', exports.createContactController);
 router.put('/:id', exports.updateContactController);
 router.delete('/:id', exports.deleteContactController);
 exports.contactRoutes = router;

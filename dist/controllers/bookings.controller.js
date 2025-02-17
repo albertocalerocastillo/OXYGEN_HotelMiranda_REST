@@ -6,7 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.bookingEndpoint = exports.bookingRoutes = exports.deleteBookingController = exports.updateBookingController = exports.createBookingController = exports.getBookingController = exports.getBookingsController = void 0;
 const express_1 = __importDefault(require("express"));
 const booking_service_1 = require("../services/booking.service");
-const booking_middleware_1 = require("../middleware/booking.middleware");
+const room_service_1 = require("../services/room.service");
+const booking_validator_1 = require("../validators/booking.validator");
+const uuid_1 = require("uuid");
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
  * @param res
@@ -42,7 +44,7 @@ const handleErrors = (res, error) => {
  */
 const getBookingsController = async (req, res) => {
     try {
-        const bookings = await (0, booking_service_1.getBookings)();
+        const bookings = await booking_service_1.bookingService.getBookings();
         res.json(bookings);
     }
     catch (error) {
@@ -73,7 +75,7 @@ exports.getBookingsController = getBookingsController;
  */
 const getBookingController = async (req, res) => {
     try {
-        const booking = await (0, booking_service_1.getBooking)(req.params.id);
+        const booking = await booking_service_1.bookingService.getBooking(req.params.id);
         if (!booking) {
             return res.status(404).json({ message: 'Reserva no encontrada' });
         }
@@ -100,13 +102,24 @@ exports.getBookingController = getBookingController;
  *     responses:
  *       201:
  *         description: Reserva creada con éxito
+ *       400:
+ *         description: Error de validación
  *       500:
  *         description: Error del servidor
  */
 const createBookingController = async (req, res) => {
     try {
-        const booking = req.body;
-        await (0, booking_service_1.createBooking)(booking);
+        const { error } = booking_validator_1.validateBookingCreate.validate(req.body);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+        const bookingData = req.body;
+        const room = await room_service_1.roomService.getRoom(bookingData.room.id);
+        if (!room) {
+            return res.status(400).json({ message: 'La habitación especificada no existe' });
+        }
+        const booking = { ...bookingData, room: room, id: (0, uuid_1.v4)() };
+        await booking_service_1.bookingService.createBooking(booking);
         res.status(201).json({ message: 'Reserva creada con éxito' });
     }
     catch (error) {
@@ -137,6 +150,8 @@ exports.createBookingController = createBookingController;
  *     responses:
  *       200:
  *         description: Reserva actualizada con éxito
+ *       400:
+ *         description: Error de validación
  *       404:
  *         description: Reserva no encontrada
  *       500:
@@ -145,8 +160,18 @@ exports.createBookingController = createBookingController;
 const updateBookingController = async (req, res) => {
     try {
         const id = req.params.id;
-        const updatedBooking = req.body;
-        await (0, booking_service_1.updateBooking)(id, updatedBooking);
+        const updatedBookingData = req.body;
+        // *** ELIMINA LA VALIDACIÓN SI NO LA NECESITAS ***
+        // const { error } = validateBookingUpdate.validate(updatedBookingData);
+        // if (error) {
+        //     return res.status(400).json({ message: error.details[0].message });
+        // }
+        const room = await room_service_1.roomService.getRoom(updatedBookingData.room.id);
+        if (!room) {
+            return res.status(400).json({ message: 'La habitación especificada no existe' });
+        }
+        const updatedBooking = { ...updatedBookingData, room: room };
+        await booking_service_1.bookingService.updateBooking(id, updatedBooking);
         res.status(200).json({ message: 'Reserva actualizada con éxito' });
     }
     catch (error) {
@@ -178,7 +203,7 @@ exports.updateBookingController = updateBookingController;
 const deleteBookingController = async (req, res) => {
     try {
         const id = req.params.id;
-        await (0, booking_service_1.deleteBooking)(id);
+        await booking_service_1.bookingService.deleteBooking(id);
         res.status(200).json({ message: 'Reserva eliminada con éxito' });
     }
     catch (error) {
@@ -189,7 +214,7 @@ exports.deleteBookingController = deleteBookingController;
 const router = express_1.default.Router();
 router.get('/', exports.getBookingsController);
 router.get('/:id', exports.getBookingController);
-router.post('/', booking_middleware_1.validateCreateBooking, exports.createBookingController);
+router.post('/', exports.createBookingController);
 router.put('/:id', exports.updateBookingController);
 router.delete('/:id', exports.deleteBookingController);
 exports.bookingRoutes = router;

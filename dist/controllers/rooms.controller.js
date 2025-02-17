@@ -7,7 +7,7 @@ exports.roomEndpoint = exports.roomRoutes = exports.deleteRoomController = expor
 const express_1 = __importDefault(require("express"));
 const uuid_1 = require("uuid");
 const room_service_1 = require("../services/room.service");
-const room_middleware_1 = require("../middleware/room.middleware");
+const room_validator_1 = require("../validators/room.validator");
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
  * @param res
@@ -48,7 +48,7 @@ const handleErrors = (res, error) => {
  */
 const getRoomsController = async (req, res) => {
     try {
-        const rooms = await (0, room_service_1.getRooms)();
+        const rooms = await room_service_1.roomService.getRooms();
         res.json(rooms);
     }
     catch (error) {
@@ -79,7 +79,7 @@ exports.getRoomsController = getRoomsController;
  */
 const getRoomController = async (req, res) => {
     try {
-        const room = await (0, room_service_1.getRoom)(req.params.id);
+        const room = await room_service_1.roomService.getRoom(req.params.id);
         if (!room) {
             return res.status(404).json({ message: 'Habitación no encontrada' });
         }
@@ -106,11 +106,17 @@ exports.getRoomController = getRoomController;
  *     responses:
  *       201:
  *         description: Habitación creada con éxito
+ *       400:
+ *         description: Error de validación
  *       500:
  *         description: Error del servidor
  */
 const createRoomController = async (req, res) => {
     try {
+        const { error } = room_validator_1.validateRoomCreate.validate(req.body);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
         const roomData = req.body;
         const defaultRoom = {
             photo: "",
@@ -125,7 +131,7 @@ const createRoomController = async (req, res) => {
             capacity: 0,
         };
         const newRoom = { ...defaultRoom, ...roomData, id: (0, uuid_1.v4)() };
-        const createdRoom = await (0, room_service_1.createRoom)(newRoom);
+        const createdRoom = await room_service_1.roomService.createRoom(newRoom);
         res.status(201).json({ message: 'Habitación creada con éxito', id: createdRoom.id });
     }
     catch (error) {
@@ -156,6 +162,8 @@ exports.createRoomController = createRoomController;
  *     responses:
  *       200:
  *         description: Habitación actualizada con éxito
+ *       400:
+ *         description: Error de validación
  *       404:
  *         description: Habitación no encontrada
  *       500:
@@ -165,7 +173,11 @@ const updateRoomController = async (req, res) => {
     try {
         const id = req.params.id;
         const updatedRoom = req.body;
-        await (0, room_service_1.updateRoom)(id, updatedRoom);
+        const { error } = room_validator_1.validateRoomUpdate.validate(updatedRoom);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+        await room_service_1.roomService.updateRoom(id, updatedRoom);
         res.status(200).json({ message: 'Habitación actualizada con éxito' });
     }
     catch (error) {
@@ -197,7 +209,7 @@ exports.updateRoomController = updateRoomController;
 const deleteRoomController = async (req, res) => {
     try {
         const id = req.params.id;
-        await (0, room_service_1.deleteRoom)(id);
+        await room_service_1.roomService.deleteRoom(id);
         res.status(200).json({ message: 'Habitación eliminada con éxito' });
     }
     catch (error) {
@@ -208,8 +220,8 @@ exports.deleteRoomController = deleteRoomController;
 const router = express_1.default.Router();
 router.get('/', exports.getRoomsController);
 router.get('/:id', exports.getRoomController);
-router.post('/', room_middleware_1.validateCreateRoom, exports.createRoomController);
-router.put('/:id', room_middleware_1.validateUpdateRoom, exports.updateRoomController);
+router.post('/', exports.createRoomController);
+router.put('/:id', exports.updateRoomController);
 router.delete('/:id', exports.deleteRoomController);
 exports.roomRoutes = router;
 exports.roomEndpoint = {

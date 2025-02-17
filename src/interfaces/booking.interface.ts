@@ -1,3 +1,5 @@
+import { Room } from './room.interface';
+
 export interface Booking {
     id: string;
     guest: string;
@@ -7,7 +9,7 @@ export interface Booking {
     checkOutDate: string;
     checkOutTime: string;
     specialRequest: string;
-    roomType: string; //relacionarlo q sea un objeto con rooms
+    room: Room;
     status: string;
     specialRequestType: string;
-  }
+}

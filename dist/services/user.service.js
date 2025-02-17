@@ -33,72 +33,70 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.createUser = exports.getUser = exports.getUsers = void 0;
+exports.userService = void 0;
 const fs = __importStar(require("fs"));
 const USERS_FILE = './src/data/users.json';
-const getUsers = async () => {
-    try {
-        const data = await fs.promises.readFile(USERS_FILE, 'utf8');
-        return JSON.parse(data);
-    }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al leer el archivo de usuarios');
-    }
-};
-exports.getUsers = getUsers;
-const getUser = async (id) => {
-    try {
-        const data = await fs.promises.readFile(USERS_FILE, 'utf8');
-        const users = JSON.parse(data);
-        return users.find(u => u.id === id);
-    }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al leer el archivo de usuarios');
-    }
-};
-exports.getUser = getUser;
-const createUser = async (user) => {
-    try {
-        const data = await fs.promises.readFile(USERS_FILE, 'utf8');
-        const users = JSON.parse(data);
-        users.push(user);
-        await fs.promises.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
-    }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al crear el usuario');
-    }
-};
-exports.createUser = createUser;
-const updateUser = async (id, updatedUser) => {
-    try {
-        const data = await fs.promises.readFile(USERS_FILE, 'utf8');
-        const users = JSON.parse(data);
-        const index = users.findIndex(u => u.id === id);
-        if (index === -1) {
-            throw new Error('Usuario no encontrado');
+class UserService {
+    async getUsers() {
+        try {
+            const data = await fs.promises.readFile(USERS_FILE, 'utf8');
+            return JSON.parse(data);
         }
-        users[index] = { ...users[index], ...updatedUser };
-        await fs.promises.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al leer el archivo de usuarios');
+        }
     }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al actualizar el usuario');
+    async getUser(id) {
+        try {
+            const data = await fs.promises.readFile(USERS_FILE, 'utf8');
+            const users = JSON.parse(data);
+            return users.find(u => u.id === id);
+        }
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al leer el archivo de usuarios');
+        }
     }
-};
-exports.updateUser = updateUser;
-const deleteUser = async (id) => {
-    try {
-        const data = await fs.promises.readFile(USERS_FILE, 'utf8');
-        const users = JSON.parse(data);
-        const updatedUsers = users.filter(u => u.id !== id);
-        await fs.promises.writeFile(USERS_FILE, JSON.stringify(updatedUsers, null, 2));
+    async createUser(user) {
+        try {
+            const data = await fs.promises.readFile(USERS_FILE, 'utf8');
+            const users = JSON.parse(data);
+            users.push(user);
+            await fs.promises.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+        }
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al crear el usuario');
+        }
     }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al eliminar el usuario');
+    async updateUser(id, updatedUser) {
+        try {
+            const data = await fs.promises.readFile(USERS_FILE, 'utf8');
+            const users = JSON.parse(data);
+            const index = users.findIndex(u => u.id === id);
+            if (index === -1) {
+                throw new Error('Usuario no encontrado');
+            }
+            users[index] = { ...users[index], ...updatedUser };
+            await fs.promises.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+        }
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al actualizar el usuario');
+        }
     }
-};
-exports.deleteUser = deleteUser;
+    async deleteUser(id) {
+        try {
+            const data = await fs.promises.readFile(USERS_FILE, 'utf8');
+            const users = JSON.parse(data);
+            const updatedUsers = users.filter(u => u.id !== id);
+            await fs.promises.writeFile(USERS_FILE, JSON.stringify(updatedUsers, null, 2));
+        }
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al eliminar el usuario');
+        }
+    }
+}
+exports.userService = new UserService();

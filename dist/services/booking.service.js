@@ -33,72 +33,103 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteBooking = exports.updateBooking = exports.createBooking = exports.getBooking = exports.getBookings = void 0;
+exports.bookingService = void 0;
 const fs = __importStar(require("fs"));
 const BOOKINGS_FILE = './src/data/bookings.json';
-const getBookings = async () => {
-    try {
-        const data = await fs.promises.readFile(BOOKINGS_FILE, 'utf8');
-        return JSON.parse(data);
-    }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al leer el archivo de reservas');
-    }
-};
-exports.getBookings = getBookings;
-const getBooking = async (id) => {
-    try {
-        const data = await fs.promises.readFile(BOOKINGS_FILE, 'utf8');
-        const bookings = JSON.parse(data);
-        return bookings.find(b => b.id === id);
-    }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al leer el archivo de reservas');
-    }
-};
-exports.getBooking = getBooking;
-const createBooking = async (booking) => {
-    try {
-        const data = await fs.promises.readFile(BOOKINGS_FILE, 'utf8');
-        const bookings = JSON.parse(data);
-        bookings.push(booking);
-        await fs.promises.writeFile(BOOKINGS_FILE, JSON.stringify(bookings, null, 2));
-    }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al crear la reserva');
-    }
-};
-exports.createBooking = createBooking;
-const updateBooking = async (id, updatedBooking) => {
-    try {
-        const data = await fs.promises.readFile(BOOKINGS_FILE, 'utf8');
-        const bookings = JSON.parse(data);
-        const index = bookings.findIndex(b => b.id === id);
-        if (index === -1) {
-            throw new Error('Reserva no encontrada');
+const ROOMS_FILE = './src/data/rooms.json';
+class BookingService {
+    async getBookings() {
+        try {
+            const data = await fs.promises.readFile(BOOKINGS_FILE, 'utf8');
+            return JSON.parse(data);
         }
-        bookings[index] = { ...bookings[index], ...updatedBooking };
-        await fs.promises.writeFile(BOOKINGS_FILE, JSON.stringify(bookings, null, 2));
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al leer el archivo de reservas');
+        }
     }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al actualizar la reserva');
+    async getBooking(id) {
+        try {
+            const data = await fs.promises.readFile(BOOKINGS_FILE, 'utf8');
+            const bookings = JSON.parse(data);
+            return bookings.find(b => b.id === id);
+        }
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al leer el archivo de reservas');
+        }
     }
-};
-exports.updateBooking = updateBooking;
-const deleteBooking = async (id) => {
-    try {
-        const data = await fs.promises.readFile(BOOKINGS_FILE, 'utf8');
-        const bookings = JSON.parse(data);
-        const updatedBookings = bookings.filter(b => b.id !== id);
-        await fs.promises.writeFile(BOOKINGS_FILE, JSON.stringify(updatedBookings, null, 2));
+    async createBooking(booking) {
+        try {
+            const bookingData = await fs.promises.readFile(BOOKINGS_FILE, 'utf8');
+            const bookings = JSON.parse(bookingData);
+            const roomData = await fs.promises.readFile(ROOMS_FILE, 'utf8');
+            const rooms = JSON.parse(roomData);
+            const room = rooms.find(r => r.id === booking.room.id);
+            if (!room) {
+                throw new Error('La habitación especificada no existe');
+            }
+            booking.room = room;
+            bookings.push(booking);
+            await fs.promises.writeFile(BOOKINGS_FILE, JSON.stringify(bookings, null, 2));
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al crear la reserva: ' + error.message);
+            }
+            else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al crear la reserva: Ha ocurrido un error inesperado');
+            }
+        }
     }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al eliminar la reserva');
+    async updateBooking(id, updatedBooking) {
+        try {
+            const bookingData = await fs.promises.readFile(BOOKINGS_FILE, 'utf8');
+            const bookings = JSON.parse(bookingData);
+            const roomData = await fs.promises.readFile(ROOMS_FILE, 'utf8');
+            const rooms = JSON.parse(roomData);
+            const room = rooms.find(r => r.id === updatedBooking.room.id);
+            if (!room) {
+                throw new Error('La habitación especificada no existe');
+            }
+            const index = bookings.findIndex(b => b.id === id);
+            if (index === -1) {
+                throw new Error('Reserva no encontrada');
+            }
+            updatedBooking.room = room;
+            bookings[index] = { ...bookings[index], ...updatedBooking };
+            await fs.promises.writeFile(BOOKINGS_FILE, JSON.stringify(bookings, null, 2));
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al actualizar la reserva: ' + error.message);
+            }
+            else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al actualizar la reserva: Ha ocurrido un error inesperado');
+            }
+        }
     }
-};
-exports.deleteBooking = deleteBooking;
+    async deleteBooking(id) {
+        try {
+            const data = await fs.promises.readFile(BOOKINGS_FILE, 'utf8');
+            const bookings = JSON.parse(data);
+            const updatedBookings = bookings.filter(b => b.id !== id);
+            await fs.promises.writeFile(BOOKINGS_FILE, JSON.stringify(updatedBookings, null, 2));
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al eliminar la reserva: ' + error.message);
+            }
+            else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al eliminar la reserva: Ha ocurrido un error inesperado');
+            }
+        }
+    }
+}
+exports.bookingService = new BookingService();

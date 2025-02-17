@@ -33,73 +33,70 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteContact = exports.updateContact = exports.createContact = exports.getContact = exports.getContacts = void 0;
+exports.contactService = void 0;
 const fs = __importStar(require("fs"));
 const CONTACTS_FILE = './src/data/contact.json';
-//hacerlo con clases
-const getContacts = async () => {
-    try {
-        const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
-        return JSON.parse(data);
-    }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al leer el archivo de contactos');
-    }
-};
-exports.getContacts = getContacts;
-const getContact = async (id) => {
-    try {
-        const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
-        const contacts = JSON.parse(data);
-        return contacts.find(c => c.id === id);
-    }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al leer el archivo de contactos');
-    }
-};
-exports.getContact = getContact;
-const createContact = async (contact) => {
-    try {
-        const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
-        const contacts = JSON.parse(data);
-        contacts.push(contact);
-        await fs.promises.writeFile(CONTACTS_FILE, JSON.stringify(contacts, null, 2));
-    }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al crear el contacto');
-    }
-};
-exports.createContact = createContact;
-const updateContact = async (id, updatedContact) => {
-    try {
-        const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
-        const contacts = JSON.parse(data);
-        const index = contacts.findIndex(c => c.id === id);
-        if (index === -1) {
-            throw new Error('Contacto no encontrado');
+class ContactService {
+    async getContacts() {
+        try {
+            const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
+            return JSON.parse(data);
         }
-        contacts[index] = { ...contacts[index], ...updatedContact };
-        await fs.promises.writeFile(CONTACTS_FILE, JSON.stringify(contacts, null, 2));
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al leer el archivo de contactos');
+        }
     }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al actualizar el contacto');
+    async getContact(id) {
+        try {
+            const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
+            const contacts = JSON.parse(data);
+            return contacts.find(c => c.id === id);
+        }
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al leer el archivo de contactos');
+        }
     }
-};
-exports.updateContact = updateContact;
-const deleteContact = async (id) => {
-    try {
-        const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
-        const contacts = JSON.parse(data);
-        const updatedContacts = contacts.filter(c => c.id !== id);
-        await fs.promises.writeFile(CONTACTS_FILE, JSON.stringify(updatedContacts, null, 2));
+    async createContact(contact) {
+        try {
+            const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
+            const contacts = JSON.parse(data);
+            contacts.push(contact);
+            await fs.promises.writeFile(CONTACTS_FILE, JSON.stringify(contacts, null, 2));
+        }
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al crear el contacto');
+        }
     }
-    catch (error) {
-        console.error(error);
-        throw new Error('Error al eliminar el contacto');
+    async updateContact(id, updatedContact) {
+        try {
+            const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
+            const contacts = JSON.parse(data);
+            const index = contacts.findIndex(c => c.id === id);
+            if (index === -1) {
+                throw new Error('Contacto no encontrado');
+            }
+            contacts[index] = { ...contacts[index], ...updatedContact };
+            await fs.promises.writeFile(CONTACTS_FILE, JSON.stringify(contacts, null, 2));
+        }
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al actualizar el contacto');
+        }
     }
-};
-exports.deleteContact = deleteContact;
+    async deleteContact(id) {
+        try {
+            const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
+            const contacts = JSON.parse(data);
+            const updatedContacts = contacts.filter(c => c.id !== id);
+            await fs.promises.writeFile(CONTACTS_FILE, JSON.stringify(updatedContacts, null, 2));
+        }
+        catch (error) {
+            console.error(error);
+            throw new Error('Error al eliminar el contacto');
+        }
+    }
+}
+exports.contactService = new ContactService();

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userEndpoint = exports.userRoutes = exports.deleteUserController = exports.updateUserController = exports.createUserController = exports.getUserController = exports.getUsersController = void 0;
 const express_1 = __importDefault(require("express"));
 const user_service_1 = require("../services/user.service");
-const user_middleware_1 = require("../middleware/user.middleware");
+const user_validator_1 = require("../validators/user.validator");
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
  * @param res
@@ -42,7 +42,7 @@ const handleErrors = (res, error) => {
  */
 const getUsersController = async (req, res) => {
     try {
-        const users = await (0, user_service_1.getUsers)();
+        const users = await user_service_1.userService.getUsers();
         res.json(users);
     }
     catch (error) {
@@ -73,7 +73,7 @@ exports.getUsersController = getUsersController;
  */
 const getUserController = async (req, res) => {
     try {
-        const user = await (0, user_service_1.getUser)(req.params.id);
+        const user = await user_service_1.userService.getUser(req.params.id);
         if (!user) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
@@ -100,13 +100,19 @@ exports.getUserController = getUserController;
  *     responses:
  *       201:
  *         description: Usuario creado con éxito
+ *       400:
+ *         description: Error de validación
  *       500:
  *         description: Error del servidor
  */
 const createUserController = async (req, res) => {
     try {
+        const { error } = user_validator_1.validateUserCreate.validate(req.body);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
         const user = req.body;
-        await (0, user_service_1.createUser)(user);
+        await user_service_1.userService.createUser(user);
         res.status(201).json({ message: 'Usuario creado con éxito' });
     }
     catch (error) {
@@ -137,6 +143,8 @@ exports.createUserController = createUserController;
  *     responses:
  *       200:
  *         description: Usuario actualizado con éxito
+ *       400:
+ *         description: Error de validación
  *       404:
  *         description: Usuario no encontrado
  *       500:
@@ -146,7 +154,11 @@ const updateUserController = async (req, res) => {
     try {
         const id = req.params.id;
         const updatedUser = req.body;
-        await (0, user_service_1.updateUser)(id, updatedUser);
+        const { error } = user_validator_1.validateUserUpdate.validate(updatedUser);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+        await user_service_1.userService.updateUser(id, updatedUser);
         res.status(200).json({ message: 'Usuario actualizado con éxito' });
     }
     catch (error) {
@@ -178,7 +190,7 @@ exports.updateUserController = updateUserController;
 const deleteUserController = async (req, res) => {
     try {
         const id = req.params.id;
-        await (0, user_service_1.deleteUser)(id);
+        await user_service_1.userService.deleteUser(id);
         res.status(200).json({ message: 'Usuario eliminado con éxito' });
     }
     catch (error) {
@@ -189,8 +201,8 @@ exports.deleteUserController = deleteUserController;
 const router = express_1.default.Router();
 router.get('/', exports.getUsersController);
 router.get('/:id', exports.getUserController);
-router.post('/', user_middleware_1.validateCreateUser, exports.createUserController);
-router.put('/:id', user_middleware_1.validateUpdateUser, exports.updateUserController);
+router.post('/', exports.createUserController);
+router.put('/:id', exports.updateUserController);
 router.delete('/:id', exports.deleteUserController);
 exports.userRoutes = router;
 exports.userEndpoint = {

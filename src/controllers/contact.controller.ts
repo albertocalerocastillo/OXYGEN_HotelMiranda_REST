@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
-import { getContacts, getContact, createContact, updateContact, deleteContact } from '../services/contact.service';
-import { validateCreateContact } from '../middleware/contact.middleware';
+import { contactService } from '../services/contact.service';
+import { validateContactCreate } from '../validators/contact.validator';
 
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
@@ -8,13 +8,13 @@ import { validateCreateContact } from '../middleware/contact.middleware';
  * @param error 
  */
 const handleErrors = (res: Response, error: unknown) => {
-  if (error instanceof Error) {
-    console.error(error.message);
-    res.status(500).json({ message: error.message });
-  } else {
-    console.error('Error desconocido:', error);
-    res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
-  }
+    if (error instanceof Error) {
+        console.error(error.message);
+        res.status(500).json({ message: error.message });
+    } else {
+        console.error('Error desconocido:', error);
+        res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
+    }
 };
 
 /**
@@ -37,12 +37,12 @@ const handleErrors = (res: Response, error: unknown) => {
  *         description: Error del servidor
  */
 export const getContactsController = async (req: Request, res: Response) => {
-  try {
-    const contacts = await getContacts();
-    res.json(contacts);
-  } catch (error: unknown) {
-    handleErrors(res, error);
-  }
+    try {
+        const contacts = await contactService.getContacts();
+        res.json(contacts);
+    } catch (error: unknown) {
+        handleErrors(res, error);
+    }
 };
 
 /**
@@ -67,15 +67,15 @@ export const getContactsController = async (req: Request, res: Response) => {
  *         description: Error del servidor
  */
 export const getContactController = async (req: Request, res: Response) => {
-  try {
-    const contact = await getContact(req.params.id);
-    if (!contact) {
-      return res.status(404).json({ message: 'Contacto no encontrado' });
+    try {
+        const contact = await contactService.getContact(req.params.id);
+        if (!contact) {
+            return res.status(404).json({ message: 'Contacto no encontrado' });
+        }
+        res.json(contact);
+    } catch (error: unknown) {
+        handleErrors(res, error);
     }
-    res.json(contact);
-  } catch (error: unknown) {
-    handleErrors(res, error);
-  }
 };
 
 /**
@@ -94,17 +94,24 @@ export const getContactController = async (req: Request, res: Response) => {
  *     responses:
  *       201:
  *         description: Contacto creado con éxito
+ *       400:
+ *         description: Error de validación
  *       500:
  *         description: Error del servidor
  */
 export const createContactController = async (req: Request, res: Response) => {
-  try {
-    const contact = req.body;
-    await createContact(contact);
-    res.status(201).json({ message: 'Contacto creado con éxito' });
-  } catch (error: unknown) {
-    handleErrors(res, error);
-  }
+    try {
+        const { error } = validateContactCreate.validate(req.body);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+
+        const contact = req.body;
+        await contactService.createContact(contact);
+        res.status(201).json({ message: 'Contacto creado con éxito' });
+    } catch (error: unknown) {
+        handleErrors(res, error);
+    }
 };
 
 /**
@@ -130,20 +137,28 @@ export const createContactController = async (req: Request, res: Response) => {
  *     responses:
  *       200:
  *         description: Contacto actualizado con éxito
+ *       400:
+ *         description: Error de validación
  *       404:
  *         description: Contacto no encontrado
  *       500:
  *         description: Error del servidor
  */
 export const updateContactController = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    const updatedContact = req.body;
-    await updateContact(id, updatedContact);
-    res.status(200).json({ message: 'Contacto actualizado con éxito' });
-  } catch (error: unknown) {
-    handleErrors(res, error);
-  }
+    try {
+        const id = req.params.id;
+        const updatedContact = req.body;
+
+        const { error } = validateContactCreate.validate(updatedContact);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+
+        await contactService.updateContact(id, updatedContact);
+        res.status(200).json({ message: 'Contacto actualizado con éxito' });
+    } catch (error: unknown) {
+        handleErrors(res, error);
+    }
 };
 
 /**
@@ -168,27 +183,27 @@ export const updateContactController = async (req: Request, res: Response) => {
  *         description: Error del servidor
  */
 export const deleteContactController = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    await deleteContact(id);
-    res.status(200).json({ message: 'Contacto eliminado con éxito' });
-  } catch (error: unknown) {
-    handleErrors(res, error);
-  }
+    try {
+        const id = req.params.id;
+        await contactService.deleteContact(id);
+        res.status(200).json({ message: 'Contacto eliminado con éxito' });
+    } catch (error: unknown) {
+        handleErrors(res, error);
+    }
 };
 
 const router = express.Router();
 
 router.get('/', getContactsController);
 router.get('/:id', getContactController);
-router.post('/', validateCreateContact, createContactController);
+router.post('/', createContactController);
 router.put('/:id', updateContactController);
 router.delete('/:id', deleteContactController);
 
 export const contactRoutes = router;
 
 export const contactEndpoint = {
-  path: '/contacts',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  private: true
+    path: '/contacts',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    private: true
 };
