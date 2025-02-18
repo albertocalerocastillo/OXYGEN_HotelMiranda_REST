@@ -27,9 +27,11 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@types/mongoose": "^5.11.96",
     "dotenv": "^16.4.7",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.10.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^11.0.5"
