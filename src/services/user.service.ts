@@ -1,6 +1,10 @@
 import { User } from '../interfaces/user.interface';
 import { UserModel } from '../models/user.model';
 
+async function loadBcrypt() {
+    return await import('bcrypt');
+}
+
 class UserService {
     async getUsers(): Promise<User[]> {
         try {
@@ -32,7 +36,12 @@ class UserService {
 
     async createUser(user: User): Promise<User> {
         try {
-            const newUser = new UserModel(user);
+            const bcrypt = await loadBcrypt();
+            if (!user.password) {
+                throw new Error('La contraseña del usuario no está definida');
+            }
+            const hashedPassword = await bcrypt.hash(user.password, 10);
+            const newUser = new UserModel({ ...user, password: hashedPassword });
             return await newUser.save();
         } catch (error: unknown) {
             if (error instanceof Error) {
