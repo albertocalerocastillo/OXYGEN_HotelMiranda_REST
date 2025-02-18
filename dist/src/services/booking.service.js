@@ -1,94 +1,92 @@
-import { Booking } from '../interfaces/booking.interface';
-import { BookingModel } from '../models/booking.model';
-import { RoomModel } from '../models/room.model';
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.bookingService = void 0;
+const booking_model_1 = require("../models/booking.model");
+const room_model_1 = require("../models/room.model");
 class BookingService {
-    async getBookings(): Promise<Booking[]> {
+    async getBookings() {
         try {
-            return await BookingModel.find().populate('room');
-        } catch (error: unknown) {
+            return await booking_model_1.BookingModel.find().populate('room');
+        }
+        catch (error) {
             if (error instanceof Error) {
                 console.error(error.message);
                 throw new Error('Error al obtener las reservas: ' + error.message);
-            } else {
+            }
+            else {
                 console.error('Error desconocido:', error);
                 throw new Error('Error al obtener las reservas: Ha ocurrido un error inesperado');
             }
         }
     }
-
-    async getBooking(id: string): Promise<Booking | null> {
+    async getBooking(id) {
         try {
-            return await BookingModel.findById(id).populate('room');
-        } catch (error: unknown) {
+            return await booking_model_1.BookingModel.findById(id).populate('room');
+        }
+        catch (error) {
             if (error instanceof Error) {
                 console.error(error.message);
                 throw new Error('Error al obtener la reserva: ' + error.message);
-            } else {
+            }
+            else {
                 console.error('Error desconocido:', error);
                 throw new Error('Error al obtener la reserva: Ha ocurrido un error inesperado');
             }
         }
     }
-
-    async createBooking(booking: Booking): Promise<Booking> {
+    async createBooking(booking) {
         try {
-            const room = await RoomModel.findById(booking.room);
-
+            const room = await room_model_1.RoomModel.findById(booking.room);
             if (!room) {
                 throw new Error('La habitación especificada no existe');
             }
-
-            const newBooking = new BookingModel({ ...booking, room: room._id });
+            const newBooking = new booking_model_1.BookingModel({ ...booking, room: room._id });
             return await newBooking.save();
-        } catch (error: unknown) {
+        }
+        catch (error) {
             if (error instanceof Error) {
                 console.error(error.message);
                 throw new Error('Error al crear la reserva: ' + error.message);
-            } else {
+            }
+            else {
                 console.error('Error desconocido:', error);
                 throw new Error('Error al crear la reserva: Ha ocurrido un error inesperado');
             }
         }
     }
-
-    async updateBooking(id: string, updatedBooking: Booking): Promise<Booking | null> {
+    async updateBooking(id, updatedBooking) {
         try {
-            const room = await RoomModel.findById(updatedBooking.room);
-
+            const room = await room_model_1.RoomModel.findById(updatedBooking.room);
             if (!room) {
                 throw new Error('La habitación especificada no existe');
             }
-
-            return await BookingModel.findByIdAndUpdate(
-                id,
-                { ...updatedBooking, room: room._id },
-                { new: true }
-            ).populate('room');
-        } catch (error: unknown) {
+            return await booking_model_1.BookingModel.findByIdAndUpdate(id, { ...updatedBooking, room: room._id }, { new: true }).populate('room');
+        }
+        catch (error) {
             if (error instanceof Error) {
                 console.error(error.message);
                 throw new Error('Error al actualizar la reserva: ' + error.message);
-            } else {
+            }
+            else {
                 console.error('Error desconocido:', error);
                 throw new Error('Error al actualizar la reserva: Ha ocurrido un error inesperado');
             }
         }
     }
-
-    async deleteBooking(id: string): Promise<void> {
+    async deleteBooking(id) {
         try {
-            await BookingModel.findByIdAndDelete(id);
-        } catch (error: unknown) {
+            await booking_model_1.BookingModel.findByIdAndDelete(id);
+        }
+        catch (error) {
             if (error instanceof Error) {
                 console.error(error.message);
                 throw new Error('Error al eliminar la reserva: ' + error.message);
-            } else {
+            }
+            else {
                 console.error('Error desconocido:', error);
                 throw new Error('Error al eliminar la reserva: Ha ocurrido un error inesperado');
             }
         }
     }
 }
-
-export const bookingService = new BookingService();
+exports.bookingService = new BookingService();
