@@ -159,12 +159,6 @@ export const updateBookingController = async (req: Request, res: Response) => {
         const id = req.params.id;
         const updatedBookingData = req.body;
 
-        // *** ELIMINA LA VALIDACIÓN SI NO LA NECESITAS ***
-        // const { error } = validateBookingUpdate.validate(updatedBookingData);
-        // if (error) {
-        //     return res.status(400).json({ message: error.details[0].message });
-        // }
-
         const room = await roomService.getRoom(updatedBookingData.room.id);
         if (!room) {
             return res.status(400).json({ message: 'La habitación especificada no existe' });
