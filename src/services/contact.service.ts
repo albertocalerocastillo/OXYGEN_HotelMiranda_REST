@@ -1,69 +1,75 @@
 import { Contact } from '../interfaces/contact.interface';
-import * as fs from 'fs';
-
-const CONTACTS_FILE = './src/data/contact.json';
+import { ContactModel } from '../models/contact.model';
 
 class ContactService {
     async getContacts(): Promise<Contact[]> {
         try {
-            const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
-            return JSON.parse(data);
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error al leer el archivo de contactos');
-        }
-    }
-
-    async getContact(id: string): Promise<Contact | undefined> {
-        try {
-            const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
-            const contacts: Contact[] = JSON.parse(data);
-            return contacts.find(c => c.id === id);
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error al leer el archivo de contactos');
-        }
-    }
-
-    async createContact(contact: Contact): Promise<void> {
-        try {
-            const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
-            const contacts: Contact[] = JSON.parse(data);
-            contacts.push(contact);
-            await fs.promises.writeFile(CONTACTS_FILE, JSON.stringify(contacts, null, 2));
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error al crear el contacto');
-        }
-    }
-
-    async updateContact(id: string, updatedContact: Contact): Promise<void> {
-        try {
-            const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
-            const contacts: Contact[] = JSON.parse(data);
-
-            const index = contacts.findIndex(c => c.id === id);
-            if (index === -1) {
-                throw new Error('Contacto no encontrado');
+            return await ContactModel.find();
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al obtener los contactos: ' + error.message);
+            } else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al obtener los contactos: Ha ocurrido un error inesperado');
             }
+        }
+    }
 
-            contacts[index] = { ...contacts[index], ...updatedContact };
-            await fs.promises.writeFile(CONTACTS_FILE, JSON.stringify(contacts, null, 2));
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error al actualizar el contacto');
+    async getContact(id: string): Promise<Contact | null> {
+        try {
+            return await ContactModel.findById(id);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al obtener el contacto: ' + error.message);
+            } else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al obtener el contacto: Ha ocurrido un error inesperado');
+            }
+        }
+    }
+
+    async createContact(contact: Contact): Promise<Contact> {
+        try {
+            const newContact = new ContactModel(contact);
+            return await newContact.save();
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al crear el contacto: ' + error.message);
+            } else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al crear el contacto: Ha ocurrido un error inesperado');
+            }
+        }
+    }
+
+    async updateContact(id: string, updatedContact: Contact): Promise<Contact | null> {
+        try {
+            return await ContactModel.findByIdAndUpdate(id, updatedContact, { new: true });
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al actualizar el contacto: ' + error.message);
+            } else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al actualizar el contacto: Ha ocurrido un error inesperado');
+            }
         }
     }
 
     async deleteContact(id: string): Promise<void> {
         try {
-            const data = await fs.promises.readFile(CONTACTS_FILE, 'utf8');
-            const contacts: Contact[] = JSON.parse(data);
-            const updatedContacts = contacts.filter(c => c.id !== id);
-            await fs.promises.writeFile(CONTACTS_FILE, JSON.stringify(updatedContacts, null, 2));
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error al eliminar el contacto');
+            await ContactModel.findByIdAndDelete(id);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al eliminar el contacto: ' + error.message);
+            } else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al eliminar el contacto: Ha ocurrido un error inesperado');
+            }
         }
     }
 }

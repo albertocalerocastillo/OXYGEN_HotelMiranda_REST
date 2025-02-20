@@ -1,25 +1,42 @@
 import request from 'supertest';
 import app from '../app';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import mongoose from 'mongoose';
+import { RoomModel } from '../models/room.model';
 
 describe('Rooms API', () => {
     let roomId: string;
     let token: string;
+    let mongoServer: MongoMemoryServer;
 
     beforeAll(async () => {
-      const loginResponse = await request(app)
-          .post('/login')
-          .send({ username: 'James Sitepu', password: 'password123' });
-  
-      token = `Bearer ${loginResponse.body.token}`;
-  
-      const roomResponse = await request(app)
-          .post('/rooms')
-          .send({ name: 'Habitación de prueba', description: '...', price: 100, capacity: 2 })
-          .set('Authorization', token);
-  
-      roomId = String(roomResponse.body.id);
-      console.log("roomId generado:", roomId);
-  });
+        mongoServer = await MongoMemoryServer.create();
+        const mongoUri = mongoServer.getUri();
+        await mongoose.connect(mongoUri);
+
+        const loginResponse = await request(app)
+            .post('/login')
+            .send({ username: 'James Sitepu', password: 'password123' });
+
+        token = `Bearer ${loginResponse.body.token}`;
+
+        const roomResponse = await request(app)
+            .post('/rooms')
+            .send({ name: 'Habitación de prueba', description: '...', price: 100, capacity: 2 })
+            .set('Authorization', token);
+
+        roomId = String(roomResponse.body.id);
+        console.log("roomId generado:", roomId);
+    });
+
+    afterAll(async () => {
+        await mongoose.disconnect();
+        await mongoServer.stop();
+    });
+
+    afterEach(async () => {
+        await RoomModel.deleteMany({});
+    });
 
     describe('GET /rooms', () => {
         it('should return all rooms', async () => {
@@ -27,7 +44,7 @@ describe('Rooms API', () => {
             expect(response.status).toBe(200);
             expect(response.body).toBeInstanceOf(Array);
         });
-    }); 
+    });
 
     describe('GET /rooms/:id', () => {
         it('should return a room by ID', async () => {

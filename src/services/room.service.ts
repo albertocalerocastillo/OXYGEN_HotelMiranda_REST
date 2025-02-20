@@ -1,69 +1,47 @@
 import { Room } from '../interfaces/room.interface';
-import * as fs from 'fs';
-
-const ROOMS_FILE = './src/data/rooms.json';
+import { RoomModel } from '../models/room.model';
 
 class RoomService {
     async getRooms(): Promise<Room[]> {
         try {
-            const data = await fs.promises.readFile(ROOMS_FILE, 'utf8');
-            return JSON.parse(data);
+            return await RoomModel.find();
         } catch (error) {
             console.error(error);
-            throw new Error('Error al leer el archivo de habitaciones');
+            throw new Error('Error al obtener las habitaciones');
         }
     }
 
-    async getRoom(id: string): Promise<Room | undefined> {
+    async getRoom(id: string): Promise<Room | null> {
         try {
-            const data = await fs.promises.readFile(ROOMS_FILE, 'utf8');
-            const rooms: Room[] = JSON.parse(data);
-            return rooms.find(r => String(r.id) === id);
+            return await RoomModel.findById(id);
         } catch (error) {
             console.error(error);
-            throw new Error('Error al leer el archivo de habitaciones');
+            throw new Error('Error al obtener la habitación');
         }
     }
 
     async createRoom(room: Room): Promise<Room> {
         try {
-            const data = await fs.promises.readFile(ROOMS_FILE, 'utf8');
-            const rooms: Room[] = JSON.parse(data);
-
-            rooms.push(room);
-
-            await fs.promises.writeFile(ROOMS_FILE, JSON.stringify(rooms, null, 2));
-
-            return room;
-
+            const newRoom = new RoomModel(room);
+            return await newRoom.save();
         } catch (error) {
             console.error(error);
             throw new Error('Error al crear la habitación');
         }
     }
 
-    async updateRoom(id: string, updatedRoom: Room): Promise<void> {
+    async updateRoom(id: string, updatedRoom: Room): Promise<Room | null> {
         try {
-            const data = await fs.promises.readFile(ROOMS_FILE, 'utf8');
-            const rooms: Room[] = JSON.parse(data);
-            const index = rooms.findIndex(r => String(r.id) === id);
-            if (index === -1) {
-                throw new Error('Habitación no encontrada');
-            }
-            rooms[index] = { ...rooms[index], ...updatedRoom };
-            await fs.promises.writeFile(ROOMS_FILE, JSON.stringify(rooms, null, 2));
+            return await RoomModel.findByIdAndUpdate(id, updatedRoom, { new: true });
         } catch (error) {
-            console.error("Error al actualizar la habitación:", error);
+            console.error(error);
             throw new Error('Error al actualizar la habitación');
         }
     }
 
     async deleteRoom(id: string): Promise<void> {
         try {
-            const data = await fs.promises.readFile(ROOMS_FILE, 'utf8');
-            const rooms: Room[] = JSON.parse(data);
-            const updatedRooms = rooms.filter(r => String(r.id) !== id);
-            await fs.promises.writeFile(ROOMS_FILE, JSON.stringify(updatedRooms, null, 2));
+            await RoomModel.findByIdAndDelete(id);
         } catch (error) {
             console.error(error);
             throw new Error('Error al eliminar la habitación');

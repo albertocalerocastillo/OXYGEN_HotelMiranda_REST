@@ -1,69 +1,84 @@
 import { User } from '../interfaces/user.interface';
-import * as fs from 'fs';
+import { UserModel } from '../models/user.model';
 
-const USERS_FILE = './src/data/users.json';
+async function loadBcrypt() {
+    return await import('bcrypt');
+}
 
 class UserService {
     async getUsers(): Promise<User[]> {
         try {
-            const data = await fs.promises.readFile(USERS_FILE, 'utf8');
-            return JSON.parse(data);
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error al leer el archivo de usuarios');
-        }
-    }
-
-    async getUser(id: string): Promise<User | undefined> {
-        try {
-            const data = await fs.promises.readFile(USERS_FILE, 'utf8');
-            const users: User[] = JSON.parse(data);
-            return users.find(u => u.id === id);
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error al leer el archivo de usuarios');
-        }
-    }
-
-    async createUser(user: User): Promise<void> {
-        try {
-            const data = await fs.promises.readFile(USERS_FILE, 'utf8');
-            const users: User[] = JSON.parse(data);
-            users.push(user);
-            await fs.promises.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error al crear el usuario');
-        }
-    }
-
-    async updateUser(id: string, updatedUser: User): Promise<void> {
-        try {
-            const data = await fs.promises.readFile(USERS_FILE, 'utf8');
-            const users: User[] = JSON.parse(data);
-
-            const index = users.findIndex(u => u.id === id);
-            if (index === -1) {
-                throw new Error('Usuario no encontrado');
+            return await UserModel.find();
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al obtener los usuarios: ' + error.message);
+            } else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al obtener los usuarios: Ha ocurrido un error inesperado');
             }
+        }
+    }
 
-            users[index] = { ...users[index], ...updatedUser };
-            await fs.promises.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error al actualizar el usuario');
+    async getUser(id: string): Promise<User | null> {
+        try {
+            return await UserModel.findById(id);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al obtener el usuario: ' + error.message);
+            } else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al obtener el usuario: Ha ocurrido un error inesperado');
+            }
+        }
+    }
+
+    async createUser(user: User): Promise<User> {
+        try {
+            const bcrypt = await loadBcrypt();
+            if (!user.password) {
+                throw new Error('La contraseña del usuario no está definida');
+            }
+            const hashedPassword = await bcrypt.hash(user.password, 10);
+            const newUser = new UserModel({ ...user, password: hashedPassword });
+            return await newUser.save();
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al crear el usuario: ' + error.message);
+            } else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al crear el usuario: Ha ocurrido un error inesperado');
+            }
+        }
+    }
+
+    async updateUser(id: string, updatedUser: User): Promise<User | null> {
+        try {
+            return await UserModel.findByIdAndUpdate(id, updatedUser, { new: true });
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al actualizar el usuario: ' + error.message);
+            } else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al actualizar el usuario: Ha ocurrido un error inesperado');
+            }
         }
     }
 
     async deleteUser(id: string): Promise<void> {
         try {
-            const data = await fs.promises.readFile(USERS_FILE, 'utf8');
-            const users: User[] = JSON.parse(data);
-            const updatedUsers = users.filter(u => u.id !== id);
-            await fs.promises.writeFile(USERS_FILE, JSON.stringify(updatedUsers, null, 2));
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error al eliminar el usuario');
+            await UserModel.findByIdAndDelete(id);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al eliminar el usuario: ' + error.message);
+            } else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al eliminar el usuario: Ha ocurrido un error inesperado');
+            }
         }
     }
 }

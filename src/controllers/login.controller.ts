@@ -1,54 +1,36 @@
 import { Request, Response } from 'express';
-import {
-  findUserByUsernameAndPassword,
-  generateToken,
-} from '../services/auth.service';
+import jwt from 'jsonwebtoken';
+import { UserModel } from '../models/user.model';
 
-/**
- * @swagger
- * /login:
- *   post:
- *     summary: Inicia sesión de usuario
- *     tags: [Authentication]
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: Token de autenticación
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *       401:
- *         description: Credenciales inválidas
- *       500:
- *         description: Error del servidor
- */
+async function loadBcrypt() {
+    return await import('bcrypt');
+}
+
 export const login = async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+    const bcrypt = await loadBcrypt();
+    const { email, password } = req.body;
 
-  try {
-    const user = await findUserByUsernameAndPassword(username, password);
+    try {
+        const user = await UserModel.findOne({ email });
 
-    if (!user) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
+        if (!user || !user.password) {
+            return res.status(401).json({ message: 'Credenciales inválidas' });
+        }
+
+        if (!password) {
+            return res.status(401).json({ message: 'Credenciales inválidas' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Credenciales inválidas' });
+        }
+
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
+        res.json({ token });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al iniciar sesión' });
     }
-
-    const token = generateToken(user.id);
-    res.json({ token });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al iniciar sesión' });
-  }
 };
