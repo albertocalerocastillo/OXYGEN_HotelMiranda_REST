@@ -5,10 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const supertest_1 = __importDefault(require("supertest"));
 const app_1 = __importDefault(require("../app"));
+const mongodb_memory_server_1 = require("mongodb-memory-server");
+const mongoose_1 = __importDefault(require("mongoose"));
+const room_model_1 = require("../models/room.model");
 describe('Rooms API', () => {
     let roomId;
     let token;
+    let mongoServer;
     beforeAll(async () => {
+        mongoServer = await mongodb_memory_server_1.MongoMemoryServer.create();
+        const mongoUri = mongoServer.getUri();
+        await mongoose_1.default.connect(mongoUri);
         const loginResponse = await (0, supertest_1.default)(app_1.default)
             .post('/login')
             .send({ username: 'James Sitepu', password: 'password123' });
@@ -19,6 +26,13 @@ describe('Rooms API', () => {
             .set('Authorization', token);
         roomId = String(roomResponse.body.id);
         console.log("roomId generado:", roomId);
+    });
+    afterAll(async () => {
+        await mongoose_1.default.disconnect();
+        await mongoServer.stop();
+    });
+    afterEach(async () => {
+        await room_model_1.RoomModel.deleteMany({});
     });
     describe('GET /rooms', () => {
         it('should return all rooms', async () => {
