@@ -23,31 +23,6 @@ const handleErrors = (res: Response, error: unknown) => {
     }
 };
 
-/**
- * @swagger
- * tags:
- * name: Rooms
- * description: Operaciones relacionadas con las habitaciones
- */
-
-/**
- * @swagger
- * /rooms:
- * get:
- * summary: Obtiene todas las habitaciones
- * tags: [Rooms]
- * responses:
- * 200:
- * description: Lista de habitaciones
- * content:
- * application/json:
- * schema:
- * type: array
- * items:
- * $ref: '#/components/schemas/Room'
- * 500:
- * description: Error del servidor
- */
 export const getRoomsController = async (req: Request, res: Response) => {
     try {
         const rooms = await roomService.getRooms();
@@ -57,33 +32,6 @@ export const getRoomsController = async (req: Request, res: Response) => {
     }
 };
 
-/**
- * @swagger
- * /rooms/{id}:
- * get:
- * summary: Obtiene una habitación por ID
- * tags: [Rooms]
- * parameters:
- * - in: path
- * name: id
- * schema:
- * type: string
- * required: true
- * description: ID de la habitación
- * responses:
- * 200:
- * description: Datos de la habitación
- * content:
- * application/json:
- * schema:
- * $ref: '#/components/schemas/Room'
- * 400:
- * description: ID de habitación no válido
- * 404:
- * description: Habitación no encontrada
- * 500:
- * description: Error del servidor
- */
 export const getRoomController = async (req: Request, res: Response) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -102,34 +50,6 @@ export const getRoomController = async (req: Request, res: Response) => {
     }
 };
 
-/**
- * @swagger
- * /rooms:
- * post:
- * summary: Crea una nueva habitación
- * tags: [Rooms]
- * requestBody:
- * content:
- * application/json:
- * schema:
- * $ref: '#/components/schemas/RoomInput'
- * responses:
- * 201:
- * description: Habitación creada con éxito
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * message:
- * type: string
- * id:
- * type: string
- * 400:
- * description: Error de validación
- * 500:
- * description: Error del servidor
- */
 export const createRoomController = async (req: Request, res: Response) => {
     try {
         const { error } = validateRoomCreate.validate(req.body);
@@ -163,41 +83,6 @@ export const createRoomController = async (req: Request, res: Response) => {
     }
 };
 
-/**
- * @swagger
- * /rooms/{id}:
- * put:
- * summary: Actualiza una habitación existente
- * tags: [Rooms]
- * parameters:
- * - in: path
- * name: id
- * schema:
- * type: string
- * required: true
- * description: ID de la habitación
- * requestBody:
- * content:
- * application/json:
- * schema:
- * $ref: '#/components/schemas/RoomInput'
- * responses:
- * 200:
- * description: Habitación actualizada con éxito
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * message:
- * type: string
- * 400:
- * description: Error de validación
- * 404:
- * description: Habitación no encontrada
- * 500:
- * description: Error del servidor
- */
 export const updateRoomController = async (req: Request, res: Response) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -221,36 +106,6 @@ export const updateRoomController = async (req: Request, res: Response) => {
     }
 };
 
-/**
- * @swagger
- * /rooms/{id}:
- * delete:
- * summary: Elimina una habitación
- * tags: [Rooms]
- * parameters:
- * - in: path
- * name: id
- * schema:
- * type: string
- * required: true
- * description: ID de la habitación
- * responses:
- * 200:
- * description: Habitación eliminada con éxito
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * message:
- * type: string
- * 400:
- * description: ID de habitación no válido
- * 404:
- * description: Habitación no encontrada
- * 500:
- * description: Error del servidor
- */
 export const deleteRoomController = async (req: Request, res: Response) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -258,7 +113,7 @@ export const deleteRoomController = async (req: Request, res: Response) => {
         }
         const id = req.params.id;
         await roomService.deleteRoom(id);
-        res.status(200).json({ message:'Habitación eliminada con éxito' });
+        res.status(200).json({ message: 'Habitación eliminada con éxito' });
     } catch (error: unknown) {
         if (error instanceof mongoose.Error.CastError) {
             return res.status(400).json({ message: 'ID de habitación no válido' });
