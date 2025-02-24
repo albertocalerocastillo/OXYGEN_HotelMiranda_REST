@@ -1,19 +1,20 @@
 import express, { Request, Response } from 'express';
 import { connectDB } from '../database';
-import { roomRoutes } from './controllers/rooms.controller';
-import { bookingRoutes } from './controllers/bookings.controller';
-import { contactRoutes } from './controllers/contact.controller';
-import { userRoutes } from './controllers/user.controller';
-import { login } from './controllers/login.controller';
+import { roomRoutes } from './controllers/RoomsController';
+import { bookingRoutes } from './controllers/BookingsController';
+import { contactRoutes } from './controllers/ContactController';
+import { userRoutes } from './controllers/UserController';
+import { login } from './controllers/LoginController';
 import { authMiddleware } from './middleware/auth';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import * as dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 const swaggerOptions = {
     definition: {
@@ -99,6 +100,8 @@ const specs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use(express.json());
+
+app.use(cors());
 
 app.post('/login', login);
 app.use('/rooms', authMiddleware, roomRoutes);

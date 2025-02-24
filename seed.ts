@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import mongoose from 'mongoose';
 import { RoomModel } from './src/models/room.model';
-import { BookingModel } from './src/models/booking.model';
+import { BookingModel } from './src/models/BookingSchema';
 import { UserModel } from './src/models/user.model';
 import { ContactModel } from './src/models/contact.model';
 import { connectDB } from './database';

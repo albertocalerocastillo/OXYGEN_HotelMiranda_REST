@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { UserModel } from '../models/user.model';
+import { UserModel } from '../models/UserModel';
 
 declare module 'express-serve-static-core' {
     interface Request {
@@ -9,9 +9,6 @@ declare module 'express-serve-static-core' {
 }
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    if (req.method === 'GET') {
-        return next();
-    }
 
     const token = req.headers['authorization']?.replace('Bearer ', '');
 

@@ -38,18 +38,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const database_1 = require("../database");
-const rooms_controller_1 = require("./controllers/rooms.controller");
-const bookings_controller_1 = require("./controllers/bookings.controller");
-const contact_controller_1 = require("./controllers/contact.controller");
-const user_controller_1 = require("./controllers/user.controller");
-const login_controller_1 = require("./controllers/login.controller");
+const RoomsController_1 = require("./controllers/RoomsController");
+const BookingsController_1 = require("./controllers/BookingsController");
+const ContactController_1 = require("./controllers/ContactController");
+const UserController_1 = require("./controllers/UserController");
+const LoginController_1 = require("./controllers/LoginController");
 const auth_1 = require("./middleware/auth");
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const dotenv = __importStar(require("dotenv"));
+const cors_1 = __importDefault(require("cors"));
 dotenv.config();
 const app = (0, express_1.default)();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 const swaggerOptions = {
     definition: {
         openapi: '3.0.0',
@@ -131,11 +132,12 @@ const swaggerOptions = {
 const specs = (0, swagger_jsdoc_1.default)(swaggerOptions);
 app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(specs));
 app.use(express_1.default.json());
-app.post('/login', login_controller_1.login);
-app.use('/rooms', auth_1.authMiddleware, rooms_controller_1.roomRoutes);
-app.use('/bookings', auth_1.authMiddleware, bookings_controller_1.bookingRoutes);
-app.use('/contacts', auth_1.authMiddleware, contact_controller_1.contactRoutes);
-app.use('/users', auth_1.authMiddleware, user_controller_1.userRoutes);
+app.use((0, cors_1.default)());
+app.post('/login', LoginController_1.login);
+app.use('/rooms', auth_1.authMiddleware, RoomsController_1.roomRoutes);
+app.use('/bookings', auth_1.authMiddleware, BookingsController_1.bookingRoutes);
+app.use('/contacts', auth_1.authMiddleware, ContactController_1.contactRoutes);
+app.use('/users', auth_1.authMiddleware, UserController_1.userRoutes);
 app.get('/', (req, res) => {
     const hotelData = {
         name: 'Hotel Miranda',
