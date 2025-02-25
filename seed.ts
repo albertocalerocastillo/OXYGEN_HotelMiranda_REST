@@ -1,11 +1,12 @@
 import { faker } from '@faker-js/faker';
 import mongoose from 'mongoose';
-import { RoomModel } from './src/models/room.model';
-import { BookingModel } from './src/models/BookingSchema';
-import { UserModel } from './src/models/user.model';
-import { ContactModel } from './src/models/contact.model';
+import { RoomModel } from './src/models/RoomModel';
+import { BookingModel } from './src/models/BookingModel';
+import { UserModel } from './src/models/UserModel';
+import { ContactModel } from './src/models/ContactModel';
 import { connectDB } from './database';
 import 'dotenv/config';
+import bcrypt from 'bcrypt';
 
 async function main() {
   await connectDB();
@@ -94,7 +95,9 @@ async function main() {
     const contact = faker.phone.number();
     const status = faker.helpers.arrayElement(['ACTIVE', 'INACTIVE']);
     const profilePhoto = faker.image.avatar();
-    const password = faker.internet.password();
+    const password = 'admin';
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = new UserModel({
       name,
@@ -104,13 +107,13 @@ async function main() {
       contact,
       status,
       profilePhoto,
-      password,
+      password: hashedPassword,
     });
 
     await user.save();
   }
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 1; i++) {
     await generateContacts();
     await generateBookings();
     await generateRooms();

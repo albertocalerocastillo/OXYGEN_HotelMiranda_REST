@@ -74,8 +74,6 @@ const createRoomController = async (req, res) => {
             price: 0,
             offerPrice: 0,
             status: "",
-            description: "",
-            capacity: 0,
         };
         const newRoom = { ...defaultRoom, ...roomData, id: (0, uuid_1.v4)() };
         const createdRoom = await RoomService_1.roomService.createRoom(newRoom);

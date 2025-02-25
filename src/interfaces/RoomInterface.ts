@@ -1,11 +1,15 @@
 export interface Room {
   id: string;
-  photo: string;
-  number: string;
   name: string;
   type: string;
-  amenities: string;
+  number?: string;
+  amenities: string[];
   price: number;
-  offerPrice: number;
+  discount?: number;
+  offerPrice?: string;
+  photos: string[];
   status: string;
+  description?: string;
+  offer?: string;
+  cancellation?: string;
 }

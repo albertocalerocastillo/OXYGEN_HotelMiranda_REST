@@ -10,6 +10,6 @@ const UserSchema = new mongoose_1.Schema({
     contact: String,
     status: String,
     profilePhoto: String,
-    password: { type: String, select: false },
+    password: String
 });
 exports.UserModel = (0, mongoose_1.model)('User', UserSchema);

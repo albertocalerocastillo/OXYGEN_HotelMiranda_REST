@@ -68,8 +68,6 @@ export const createRoomController = async (req: Request, res: Response) => {
             price: 0,
             offerPrice: 0,
             status: "",
-            description: "",
-            capacity: 0,
         };
 
         const newRoom = { ...defaultRoom, ...roomData, id: uuidv4() };

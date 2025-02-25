@@ -9,7 +9,7 @@ const UserSchema = new Schema({
   contact: String,
   status: String,
   profilePhoto: String,
-  password: { type: String, select: false },
+  password: String
 });
 
 export const UserModel = model<User>('User', UserSchema);
