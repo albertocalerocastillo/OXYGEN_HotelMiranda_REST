@@ -1,11 +1,18 @@
 import { Booking } from '../interfaces/BookingInterface';
-import { BookingModel } from '../models/BookingModel';
-import { RoomModel } from '../models/RoomModel';
+import { connect } from '../../db';
+import { RowDataPacket } from 'mysql2';
 
 class BookingService {
     async getBookings(): Promise<Booking[]> {
         try {
-            return await BookingModel.find().populate('room');
+            const connection = await connect();
+            const [rows] = await connection.execute(`
+                SELECT bookings.*, rooms.name AS roomName
+                FROM bookings
+                INNER JOIN rooms ON bookings.roomId = rooms.id
+            `);
+            connection.release();
+            return rows as Booking[];
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -19,7 +26,16 @@ class BookingService {
 
     async getBooking(id: string): Promise<Booking | null> {
         try {
-            return await BookingModel.findById(id).populate('room');
+            const connection = await connect();
+            const [rows] = await connection.execute(`
+                SELECT bookings.*, rooms.name AS roomName
+                FROM bookings
+                INNER JOIN rooms ON bookings.roomId = rooms.id
+                WHERE bookings.id = ?
+            `, [id]);
+            connection.release();
+
+            return (rows as RowDataPacket[]).length > 0 ? (rows as RowDataPacket[])[0] as Booking : null;
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -33,14 +49,20 @@ class BookingService {
 
     async createBooking(booking: Booking): Promise<Booking> {
         try {
-            const room = await RoomModel.findById(booking.room);
-
-            if (!room) {
+            const connection = await connect();
+            const [roomRows] = await connection.execute('SELECT * FROM rooms WHERE id = ?', [booking.room]);
+            if ((roomRows as RowDataPacket[]).length === 0) {
                 throw new Error('La habitación especificada no existe');
             }
 
-            const newBooking = new BookingModel({ ...booking, room: room._id });
-            return await newBooking.save();
+            const { guest, orderDate, checkInDate, checkInTime, checkOutDate, checkOutTime, specialRequest, room, status, specialRequestType } = booking;
+            const [result] = await connection.execute(
+                'INSERT INTO bookings (guest, orderDate, checkInDate, checkInTime, checkOutDate, checkOutTime, specialRequest, roomId, status, specialRequestType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [guest, orderDate, checkInDate, checkInTime, checkOutDate, checkOutTime, specialRequest, room, status, specialRequestType]
+            );
+            const insertedId = (result as any).insertId;
+            connection.release();
+            return { ...booking, id: insertedId };
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -54,17 +76,19 @@ class BookingService {
 
     async updateBooking(id: string, updatedBooking: Booking): Promise<Booking | null> {
         try {
-            const room = await RoomModel.findById(updatedBooking.room);
-
-            if (!room) {
+            const connection = await connect();
+            const [roomRows] = await connection.execute('SELECT * FROM rooms WHERE id = ?', [updatedBooking.room]);
+            if ((roomRows as RowDataPacket[]).length === 0) {
                 throw new Error('La habitación especificada no existe');
             }
 
-            return await BookingModel.findByIdAndUpdate(
-                id,
-                { ...updatedBooking, room: room._id },
-                { new: true }
-            ).populate('room');
+            const { guest, orderDate, checkInDate, checkInTime, checkOutDate, checkOutTime, specialRequest, room, status, specialRequestType } = updatedBooking;
+            await connection.execute(
+                'UPDATE bookings SET guest = ?, orderDate = ?, checkInDate = ?, checkInTime = ?, checkOutDate = ?, checkOutTime = ?, specialRequest = ?, roomId = ?, status = ?, specialRequestType = ? WHERE id = ?',
+                [guest, orderDate, checkInDate, checkInTime, checkOutDate, checkOutTime, specialRequest, room, status, specialRequestType, id]
+            );
+            connection.release();
+            return updatedBooking;
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -78,7 +102,9 @@ class BookingService {
 
     async deleteBooking(id: string): Promise<void> {
         try {
-            await BookingModel.findByIdAndDelete(id);
+            const connection = await connect();
+            await connection.execute('DELETE FROM bookings WHERE id = ?', [id]);
+            connection.release();
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);

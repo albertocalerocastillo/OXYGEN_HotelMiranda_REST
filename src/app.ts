@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { connectDB } from '../database';
+import { connect } from '../db';
 import { roomRoutes } from './controllers/RoomsController';
 import { bookingRoutes } from './controllers/BookingsController';
 import { contactRoutes } from './controllers/ContactController';
@@ -104,10 +104,10 @@ app.use(express.json());
 app.use(cors());
 
 app.post('/login', login);
-app.use('/rooms', authMiddleware, roomRoutes);
-app.use('/bookings', authMiddleware, bookingRoutes);
-app.use('/contacts', authMiddleware, contactRoutes);
-app.use('/users', authMiddleware, userRoutes);
+app.use('/rooms', roomRoutes);
+app.use('/bookings', bookingRoutes);
+app.use('/contacts', contactRoutes);
+app.use('/users', userRoutes);
 
 app.get('/', (req: Request, res: Response) => {
     const hotelData = {
@@ -122,14 +122,21 @@ app.get('/', (req: Request, res: Response) => {
     res.json(hotelData);
 });
 
-connectDB()
-    .then(() => {
+async function startServer() {
+    try {
+        const connection = await connect();
+        console.log('Conectado a la base de datos MySQL');
+
         app.listen(port, () => {
             console.log(`Servidor escuchando en el puerto ${port}`);
         });
-    })
-    .catch((error) => {
+
+        connection.release();
+    } catch (error) {
         console.error('Error al iniciar el servidor:', error);
-    });
+    }
+}
+
+startServer();
 
 export default app;

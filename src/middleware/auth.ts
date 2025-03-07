@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { UserModel } from '../models/UserModel';
+import { connect } from '../../db';
 
 declare module 'express-serve-static-core' {
     interface Request {
@@ -9,7 +9,6 @@ declare module 'express-serve-static-core' {
 }
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-
     const token = req.headers['authorization']?.replace('Bearer ', '');
 
     if (!token) {
@@ -18,13 +17,16 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { userId: string };
-        const user = await UserModel.findById(decoded.userId);
 
-        if (!user) {
+        const connection = await connect();
+        const [rows] = await connection.execute('SELECT id FROM users WHERE id = ?', [decoded.userId]);
+        connection.release();
+
+        if ((rows as any).length === 0) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        req.user = { id: user._id };
+        req.user = { id: decoded.userId };
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Unauthorized' });

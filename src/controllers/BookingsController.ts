@@ -12,6 +12,12 @@ import { v4 as uuidv4 } from 'uuid';
 const handleErrors = (res: Response, error: unknown) => {
     if (error instanceof Error) {
         console.error(error.message);
+
+        if (error.message.includes('401')) {
+            const errorMessage = error.message.split(' - ')[1] || 'Error de autenticación';
+            return res.status(401).json({ message: errorMessage });
+        }
+
         res.status(500).json({ message: error.message });
     } else {
         console.error('Error desconocido:', error);

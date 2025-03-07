@@ -1,10 +1,14 @@
 import { Contact } from '../interfaces/ContactInterface';
-import { ContactModel } from '../models/ContactModel';
+import { connect } from '../../db';
+import { RowDataPacket } from 'mysql2';
 
 class ContactService {
     async getContacts(): Promise<Contact[]> {
         try {
-            return await ContactModel.find();
+            const connection = await connect();
+            const [rows] = await connection.execute('SELECT * FROM contacts');
+            connection.release();
+            return rows as Contact[];
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -18,7 +22,10 @@ class ContactService {
 
     async getContact(id: string): Promise<Contact | null> {
         try {
-            return await ContactModel.findById(id);
+            const connection = await connect();
+            const [rows] = await connection.execute('SELECT * FROM contacts WHERE id = ?', [id]);
+            connection.release();
+            return (rows as RowDataPacket).length > 0 ? (rows as RowDataPacket)[0] as Contact : null;
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -32,8 +39,15 @@ class ContactService {
 
     async createContact(contact: Contact): Promise<Contact> {
         try {
-            const newContact = new ContactModel(contact);
-            return await newContact.save();
+            const connection = await connect();
+            const { date, customer, email, phone, subject, comment, archived } = contact;
+            const [result] = await connection.execute(
+                'INSERT INTO contacts (date, customer, email, phone, subject, comment, archived) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [date, customer, email, phone, subject, comment, archived]
+            );
+            const insertedId = (result as any).insertId;
+            connection.release();
+            return { ...contact, id: insertedId };
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -47,7 +61,14 @@ class ContactService {
 
     async updateContact(id: string, updatedContact: Contact): Promise<Contact | null> {
         try {
-            return await ContactModel.findByIdAndUpdate(id, updatedContact, { new: true });
+            const connection = await connect();
+            const { date, customer, email, phone, subject, comment, archived } = updatedContact;
+            await connection.execute(
+                'UPDATE contacts SET date = ?, customer = ?, email = ?, phone = ?, subject = ?, comment = ?, archived = ? WHERE id = ?',
+                [date, customer, email, phone, subject, comment, archived, id]
+            );
+            connection.release();
+            return updatedContact;
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -61,7 +82,9 @@ class ContactService {
 
     async deleteContact(id: string): Promise<void> {
         try {
-            await ContactModel.findByIdAndDelete(id);
+            const connection = await connect();
+            await connection.execute('DELETE FROM contacts WHERE id = ?', [id]);
+            connection.release();
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);

@@ -1,12 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.bookingService = void 0;
-const BookingModel_1 = require("../models/BookingModel");
-const RoomModel_1 = require("../models/RoomModel");
+const db_1 = require("../../db");
 class BookingService {
     async getBookings() {
         try {
-            return await BookingModel_1.BookingModel.find().populate('room');
+            const connection = await (0, db_1.connect)();
+            const [rows] = await connection.execute(`
+                SELECT bookings.*, rooms.name AS roomName
+                FROM bookings
+                INNER JOIN rooms ON bookings.roomId = rooms.id
+            `);
+            connection.release();
+            return rows;
         }
         catch (error) {
             if (error instanceof Error) {
@@ -21,7 +27,15 @@ class BookingService {
     }
     async getBooking(id) {
         try {
-            return await BookingModel_1.BookingModel.findById(id).populate('room');
+            const connection = await (0, db_1.connect)();
+            const [rows] = await connection.execute(`
+                SELECT bookings.*, rooms.name AS roomName
+                FROM bookings
+                INNER JOIN rooms ON bookings.roomId = rooms.id
+                WHERE bookings.id = ?
+            `, [id]);
+            connection.release();
+            return rows.length > 0 ? rows[0] : null;
         }
         catch (error) {
             if (error instanceof Error) {
@@ -36,12 +50,16 @@ class BookingService {
     }
     async createBooking(booking) {
         try {
-            const room = await RoomModel_1.RoomModel.findById(booking.room);
-            if (!room) {
+            const connection = await (0, db_1.connect)();
+            const [roomRows] = await connection.execute('SELECT * FROM rooms WHERE id = ?', [booking.room]);
+            if (roomRows.length === 0) {
                 throw new Error('La habitación especificada no existe');
             }
-            const newBooking = new BookingModel_1.BookingModel({ ...booking, room: room._id });
-            return await newBooking.save();
+            const { guest, orderDate, checkInDate, checkInTime, checkOutDate, checkOutTime, specialRequest, room, status, specialRequestType } = booking;
+            const [result] = await connection.execute('INSERT INTO bookings (guest, orderDate, checkInDate, checkInTime, checkOutDate, checkOutTime, specialRequest, roomId, status, specialRequestType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [guest, orderDate, checkInDate, checkInTime, checkOutDate, checkOutTime, specialRequest, room, status, specialRequestType]);
+            const insertedId = result.insertId;
+            connection.release();
+            return { ...booking, id: insertedId };
         }
         catch (error) {
             if (error instanceof Error) {
@@ -56,11 +74,15 @@ class BookingService {
     }
     async updateBooking(id, updatedBooking) {
         try {
-            const room = await RoomModel_1.RoomModel.findById(updatedBooking.room);
-            if (!room) {
+            const connection = await (0, db_1.connect)();
+            const [roomRows] = await connection.execute('SELECT * FROM rooms WHERE id = ?', [updatedBooking.room]);
+            if (roomRows.length === 0) {
                 throw new Error('La habitación especificada no existe');
             }
-            return await BookingModel_1.BookingModel.findByIdAndUpdate(id, { ...updatedBooking, room: room._id }, { new: true }).populate('room');
+            const { guest, orderDate, checkInDate, checkInTime, checkOutDate, checkOutTime, specialRequest, room, status, specialRequestType } = updatedBooking;
+            await connection.execute('UPDATE bookings SET guest = ?, orderDate = ?, checkInDate = ?, checkInTime = ?, checkOutDate = ?, checkOutTime = ?, specialRequest = ?, roomId = ?, status = ?, specialRequestType = ? WHERE id = ?', [guest, orderDate, checkInDate, checkInTime, checkOutDate, checkOutTime, specialRequest, room, status, specialRequestType, id]);
+            connection.release();
+            return updatedBooking;
         }
         catch (error) {
             if (error instanceof Error) {
@@ -75,7 +97,9 @@ class BookingService {
     }
     async deleteBooking(id) {
         try {
-            await BookingModel_1.BookingModel.findByIdAndDelete(id);
+            const connection = await (0, db_1.connect)();
+            await connection.execute('DELETE FROM bookings WHERE id = ?', [id]);
+            connection.release();
         }
         catch (error) {
             if (error instanceof Error) {

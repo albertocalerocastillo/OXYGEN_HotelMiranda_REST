@@ -17,6 +17,10 @@ const uuid_1 = require("uuid");
 const handleErrors = (res, error) => {
     if (error instanceof Error) {
         console.error(error.message);
+        if (error.message.includes('401')) {
+            const errorMessage = error.message.split(' - ')[1] || 'Error de autenticación';
+            return res.status(401).json({ message: errorMessage });
+        }
         res.status(500).json({ message: error.message });
     }
     else {
