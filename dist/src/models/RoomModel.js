@@ -12,6 +12,6 @@ const RoomSchema = new mongoose_1.Schema({
     offerPrice: Number,
     status: String,
     description: String,
-    capacity: Number,
+    // capacity: Number,
 });
 exports.RoomModel = (0, mongoose_1.model)('Room', RoomSchema);

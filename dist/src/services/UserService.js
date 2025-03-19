@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userService = void 0;
 const db_1 = require("../../db");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const uuid_1 = require("uuid");
 class UserService {
     async getUsers() {
         try {
@@ -50,11 +51,11 @@ class UserService {
             }
             const hashedPassword = await bcrypt_1.default.hash(user.password, 10);
             const connection = await (0, db_1.connect)();
-            const { name, email, jobDesk, contact, status, profilePhoto } = user;
-            const [result] = await connection.execute('INSERT INTO users (name, email, password, jobDesk, contact, status, profilePhoto) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, email, hashedPassword, jobDesk, contact, status, profilePhoto]);
-            const insertedId = result.insertId;
+            const id = (0, uuid_1.v4)();
+            const { name, email, jobDesk, contact, status, profilePhoto, joinDate } = user;
+            const [result] = await connection.execute('INSERT INTO users (id, name, email, password, jobDesk, contact, status, profilePhoto, joinDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, name, email, hashedPassword, jobDesk, contact, status, profilePhoto, joinDate]);
             connection.release();
-            return { ...user, id: insertedId, password: hashedPassword };
+            return { id, ...user, password: hashedPassword };
         }
         catch (error) {
             if (error instanceof Error) {
@@ -70,8 +71,8 @@ class UserService {
     async updateUser(id, updatedUser) {
         try {
             const connection = await (0, db_1.connect)();
-            const { name, email, jobDesk, contact, status, profilePhoto } = updatedUser;
-            await connection.execute('UPDATE users SET name = ?, email = ?, jobDesk = ?, contact = ?, status = ?, profilePhoto = ? WHERE id = ?', [name, email, jobDesk, contact, status, profilePhoto, id]);
+            const { name, email, jobDesk, contact, status, profilePhoto, joinDate } = updatedUser;
+            await connection.execute('UPDATE users SET name = ?, email = ?, jobDesk = ?, contact = ?, status = ?, profilePhoto = ?, joinDate = ? WHERE id = ?', [name, email, jobDesk, contact, status, profilePhoto, joinDate, id]);
             connection.release();
             return updatedUser;
         }

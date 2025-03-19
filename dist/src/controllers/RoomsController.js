@@ -7,7 +7,6 @@ exports.roomEndpoint = exports.roomRoutes = exports.deleteRoomController = expor
 const express_1 = __importDefault(require("express"));
 const uuid_1 = require("uuid");
 const RoomService_1 = require("../services/RoomService");
-const RoomValidator_1 = require("../validators/RoomValidator");
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
  * @param res
@@ -53,10 +52,10 @@ const getRoomController = async (req, res) => {
 exports.getRoomController = getRoomController;
 const createRoomController = async (req, res) => {
     try {
-        const { error } = RoomValidator_1.validateRoomCreate.validate(req.body);
-        if (error) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
+        // const { error } = validateRoomCreate.validate(req.body);
+        //  if (error) {
+        //      return res.status(400).json({ message: error.details[0].message });
+        //  }
         const roomData = req.body;
         const defaultRoom = {
             photo: "",
@@ -81,10 +80,10 @@ const updateRoomController = async (req, res) => {
     try {
         const id = req.params.id;
         const updatedRoom = req.body;
-        const { error } = RoomValidator_1.validateRoomUpdate.validate(updatedRoom);
-        if (error) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
+        // const { error } = validateRoomUpdate.validate(updatedRoom);
+        // if (error) {
+        //     return res.status(400).json({ message: error.details[0].message });
+        // }
         await RoomService_1.roomService.updateRoom(id, updatedRoom);
         res.status(200).json({ message: 'Habitación actualizada con éxito' });
     }

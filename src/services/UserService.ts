@@ -2,6 +2,7 @@ import { User } from '../interfaces/UserInterface';
 import { connect } from '../../db';
 import { RowDataPacket } from 'mysql2';
 import bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 class UserService {
     async getUsers(): Promise<User[]> {
@@ -38,21 +39,21 @@ class UserService {
         }
     }
 
-    async createUser(user: User): Promise<User> {
+    async createUser(user: Omit<User, 'id'>): Promise<User> {
         try {
             if (!user.password) {
                 throw new Error('La contraseña del usuario no está definida');
             }
             const hashedPassword = await bcrypt.hash(user.password, 10);
             const connection = await connect();
-            const { name, email, jobDesk, contact, status, profilePhoto } = user;
+            const id = uuidv4();
+            const { name, email, jobDesk, contact, status, profilePhoto, joinDate } = user;
             const [result] = await connection.execute(
-                'INSERT INTO users (name, email, password, jobDesk, contact, status, profilePhoto) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [name, email, hashedPassword, jobDesk, contact, status, profilePhoto]
+                'INSERT INTO users (id, name, email, password, jobDesk, contact, status, profilePhoto, joinDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [id, name, email, hashedPassword, jobDesk, contact, status, profilePhoto, joinDate]
             );
-            const insertedId = (result as any).insertId;
             connection.release();
-            return { ...user, id: insertedId, password: hashedPassword };
+            return { id, ...user, password: hashedPassword };
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -67,10 +68,10 @@ class UserService {
     async updateUser(id: string, updatedUser: User): Promise<User | null> {
         try {
             const connection = await connect();
-            const { name, email, jobDesk, contact, status, profilePhoto } = updatedUser;
+            const { name, email, jobDesk, contact, status, profilePhoto, joinDate } = updatedUser;
             await connection.execute(
-                'UPDATE users SET name = ?, email = ?, jobDesk = ?, contact = ?, status = ?, profilePhoto = ? WHERE id = ?',
-                [name, email, jobDesk, contact, status, profilePhoto, id]
+                'UPDATE users SET name = ?, email = ?, jobDesk = ?, contact = ?, status = ?, profilePhoto = ?, joinDate = ? WHERE id = ?',
+                [name, email, jobDesk, contact, status, profilePhoto, joinDate, id]
             );
             connection.release();
             return updatedUser;
