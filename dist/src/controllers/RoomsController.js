@@ -7,8 +7,6 @@ exports.roomEndpoint = exports.roomRoutes = exports.deleteRoomController = expor
 const express_1 = __importDefault(require("express"));
 const uuid_1 = require("uuid");
 const RoomService_1 = require("../services/RoomService");
-const RoomValidator_1 = require("../validators/RoomValidator");
-const mongoose_1 = __importDefault(require("mongoose"));
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
  * @param res
@@ -41,9 +39,6 @@ const getRoomsController = async (req, res) => {
 exports.getRoomsController = getRoomsController;
 const getRoomController = async (req, res) => {
     try {
-        if (!mongoose_1.default.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ message: 'ID de habitación no válido' });
-        }
         const room = await RoomService_1.roomService.getRoom(req.params.id);
         if (!room) {
             return res.status(404).json({ message: 'Habitación no encontrada' });
@@ -51,19 +46,16 @@ const getRoomController = async (req, res) => {
         res.json(room);
     }
     catch (error) {
-        if (error instanceof mongoose_1.default.Error.CastError) {
-            return res.status(400).json({ message: 'ID de habitación no válido' });
-        }
         handleErrors(res, error);
     }
 };
 exports.getRoomController = getRoomController;
 const createRoomController = async (req, res) => {
     try {
-        const { error } = RoomValidator_1.validateRoomCreate.validate(req.body);
-        if (error) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
+        // const { error } = validateRoomCreate.validate(req.body);
+        //  if (error) {
+        //      return res.status(400).json({ message: error.details[0].message });
+        //  }
         const roomData = req.body;
         const defaultRoom = {
             photo: "",
@@ -86,39 +78,27 @@ const createRoomController = async (req, res) => {
 exports.createRoomController = createRoomController;
 const updateRoomController = async (req, res) => {
     try {
-        if (!mongoose_1.default.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ message: 'ID de habitación no válido' });
-        }
         const id = req.params.id;
         const updatedRoom = req.body;
-        const { error } = RoomValidator_1.validateRoomUpdate.validate(updatedRoom);
-        if (error) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
+        // const { error } = validateRoomUpdate.validate(updatedRoom);
+        // if (error) {
+        //     return res.status(400).json({ message: error.details[0].message });
+        // }
         await RoomService_1.roomService.updateRoom(id, updatedRoom);
         res.status(200).json({ message: 'Habitación actualizada con éxito' });
     }
     catch (error) {
-        if (error instanceof mongoose_1.default.Error.CastError) {
-            return res.status(400).json({ message: 'ID de habitación no válido' });
-        }
         handleErrors(res, error);
     }
 };
 exports.updateRoomController = updateRoomController;
 const deleteRoomController = async (req, res) => {
     try {
-        if (!mongoose_1.default.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ message: 'ID de habitación no válido' });
-        }
         const id = req.params.id;
         await RoomService_1.roomService.deleteRoom(id);
         res.status(200).json({ message: 'Habitación eliminada con éxito' });
     }
     catch (error) {
-        if (error instanceof mongoose_1.default.Error.CastError) {
-            return res.status(400).json({ message: 'ID de habitación no válido' });
-        }
         handleErrors(res, error);
     }
 };

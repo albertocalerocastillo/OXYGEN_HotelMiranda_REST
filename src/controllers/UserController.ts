@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { userService } from '../services/UserService';
+import bcrypt from 'bcrypt';
 import { validateUserCreate, validateUserUpdate } from '../validators/UserValidator';
 
 /**
@@ -100,17 +101,30 @@ export const getUserController = async (req: Request, res: Response) => {
  *         description: Error del servidor
  */
 export const createUserController = async (req: Request, res: Response) => {
+    console.log('createUserController fue alcanzado');
+    console.log('req.body:', req.body);
     try {
-        const { error } = validateUserCreate.validate(req.body);
-        if (error) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
+        const { name, email, contact, joinDate, jobDesk, status, password } = req.body;
+        const defaultProfilePhotoPath = '../../assets/perfil.jpg';
 
-        const user = req.body;
-        await userService.createUser(user);
-        res.status(201).json({ message: 'Usuario creado con éxito' });
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const userWithDefaultPhoto = {
+            name,
+            email,
+            contact,
+            joinDate,
+            jobDesk,
+            status,
+            password: hashedPassword,
+            profilePhoto: defaultProfilePhotoPath,
+        };
+
+        await userService.createUser(userWithDefaultPhoto);
+        res.status(201).json({ message: 'Usuario creado con éxito', data: { ...userWithDefaultPhoto, password: undefined } });
     } catch (error: unknown) {
-        handleErrors(res, error);
+        console.error('Error en createUserController:', error);
+        res.status(500).json({ message: 'Error al crear el usuario' });
     }
 };
 
@@ -148,12 +162,10 @@ export const updateUserController = async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
         const updatedUser = req.body;
-
-        const { error } = validateUserUpdate.validate(updatedUser);
-        if (error) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
-
+        // const { error } = validateUserUpdate.validate(updatedUser);
+        // if (error) {
+        //     return res.status(400).json({ message: error.details[0].message });
+        // }
         await userService.updateUser(id, updatedUser);
         res.status(200).json({ message: 'Usuario actualizado con éxito' });
     } catch (error: unknown) {

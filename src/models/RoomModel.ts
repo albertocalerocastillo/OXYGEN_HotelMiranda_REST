@@ -11,7 +11,7 @@ const RoomSchema = new Schema({
   offerPrice: Number,
   status: String,
   description: String,
-  capacity: Number,
+  // capacity: Number,
 });
 
 export const RoomModel = model<Room>('Room', RoomSchema);

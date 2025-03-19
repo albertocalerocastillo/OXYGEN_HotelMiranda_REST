@@ -1,14 +1,16 @@
 import { User } from '../interfaces/UserInterface';
-import { UserModel } from '../models/UserModel';
-
-async function loadBcrypt() {
-    return await import('bcrypt');
-}
+import { connect } from '../../db';
+import { RowDataPacket } from 'mysql2';
+import bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 class UserService {
     async getUsers(): Promise<User[]> {
         try {
-            return await UserModel.find();
+            const connection = await connect();
+            const [rows] = await connection.execute('SELECT id, name, email, jobDesk, contact, status, profilePhoto, password, joinDate FROM users');
+            connection.release();
+            return rows as User[];
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -22,7 +24,10 @@ class UserService {
 
     async getUser(id: string): Promise<User | null> {
         try {
-            return await UserModel.findById(id);
+            const connection = await connect();
+            const [rows] = await connection.execute('SELECT id, name, email, jobDesk, contact, status, profilePhoto, password, joinDate FROM users WHERE id = ?', [id]);
+            connection.release();
+            return (rows as RowDataPacket[]).length > 0 ? (rows as RowDataPacket[])[0] as User : null;
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -34,15 +39,21 @@ class UserService {
         }
     }
 
-    async createUser(user: User): Promise<User> {
+    async createUser(user: Omit<User, 'id'>): Promise<User> {
         try {
-            const bcrypt = await loadBcrypt();
             if (!user.password) {
                 throw new Error('La contraseña del usuario no está definida');
             }
             const hashedPassword = await bcrypt.hash(user.password, 10);
-            const newUser = new UserModel({ ...user, password: hashedPassword });
-            return await newUser.save();
+            const connection = await connect();
+            const id = uuidv4();
+            const { name, email, jobDesk, contact, status, profilePhoto, joinDate } = user;
+            const [result] = await connection.execute(
+                'INSERT INTO users (id, name, email, password, jobDesk, contact, status, profilePhoto, joinDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [id, name, email, hashedPassword, jobDesk, contact, status, profilePhoto, joinDate]
+            );
+            connection.release();
+            return { id, ...user, password: hashedPassword };
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -56,7 +67,14 @@ class UserService {
 
     async updateUser(id: string, updatedUser: User): Promise<User | null> {
         try {
-            return await UserModel.findByIdAndUpdate(id, updatedUser, { new: true });
+            const connection = await connect();
+            const { name, email, jobDesk, contact, status, profilePhoto, joinDate } = updatedUser;
+            await connection.execute(
+                'UPDATE users SET name = ?, email = ?, jobDesk = ?, contact = ?, status = ?, profilePhoto = ?, joinDate = ? WHERE id = ?',
+                [name, email, jobDesk, contact, status, profilePhoto, joinDate, id]
+            );
+            connection.release();
+            return updatedUser;
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -70,7 +88,9 @@ class UserService {
 
     async deleteUser(id: string): Promise<void> {
         try {
-            await UserModel.findByIdAndDelete(id);
+            const connection = await connect();
+            await connection.execute('DELETE FROM users WHERE id = ?', [id]);
+            connection.release();
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error(error.message);

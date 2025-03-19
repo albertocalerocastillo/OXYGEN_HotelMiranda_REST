@@ -37,13 +37,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const database_1 = require("../database");
+const db_1 = require("../db");
 const RoomsController_1 = require("./controllers/RoomsController");
 const BookingsController_1 = require("./controllers/BookingsController");
 const ContactController_1 = require("./controllers/ContactController");
 const UserController_1 = require("./controllers/UserController");
 const LoginController_1 = require("./controllers/LoginController");
-const auth_1 = require("./middleware/auth");
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const dotenv = __importStar(require("dotenv"));
@@ -134,10 +133,10 @@ app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.de
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 app.post('/login', LoginController_1.login);
-app.use('/rooms', auth_1.authMiddleware, RoomsController_1.roomRoutes);
-app.use('/bookings', auth_1.authMiddleware, BookingsController_1.bookingRoutes);
-app.use('/contacts', auth_1.authMiddleware, ContactController_1.contactRoutes);
-app.use('/users', auth_1.authMiddleware, UserController_1.userRoutes);
+app.use('/rooms', RoomsController_1.roomRoutes);
+app.use('/bookings', BookingsController_1.bookingRoutes);
+app.use('/contacts', ContactController_1.contactRoutes);
+app.use('/users', UserController_1.userRoutes);
 app.get('/', (req, res) => {
     const hotelData = {
         name: 'Hotel Miranda',
@@ -150,13 +149,18 @@ app.get('/', (req, res) => {
     };
     res.json(hotelData);
 });
-(0, database_1.connectDB)()
-    .then(() => {
-    app.listen(port, () => {
-        console.log(`Servidor escuchando en el puerto ${port}`);
-    });
-})
-    .catch((error) => {
-    console.error('Error al iniciar el servidor:', error);
-});
+async function startServer() {
+    try {
+        const connection = await (0, db_1.connect)();
+        console.log('Conectado a la base de datos MySQL');
+        app.listen(port, () => {
+            console.log(`Servidor escuchando en el puerto ${port}`);
+        });
+        connection.release();
+    }
+    catch (error) {
+        console.error('Error al iniciar el servidor:', error);
+    }
+}
+startServer();
 exports.default = app;

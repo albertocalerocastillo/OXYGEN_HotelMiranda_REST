@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userEndpoint = exports.userRoutes = exports.deleteUserController = exports.updateUserController = exports.createUserController = exports.getUserController = exports.getUsersController = void 0;
 const express_1 = __importDefault(require("express"));
 const UserService_1 = require("../services/UserService");
-const UserValidator_1 = require("../validators/UserValidator");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 /**
  * Función para manejar errores y enviar respuestas con código de error 500
  * @param res
@@ -106,17 +106,28 @@ exports.getUserController = getUserController;
  *         description: Error del servidor
  */
 const createUserController = async (req, res) => {
+    console.log('createUserController fue alcanzado');
+    console.log('req.body:', req.body);
     try {
-        const { error } = UserValidator_1.validateUserCreate.validate(req.body);
-        if (error) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
-        const user = req.body;
-        await UserService_1.userService.createUser(user);
-        res.status(201).json({ message: 'Usuario creado con éxito' });
+        const { name, email, contact, joinDate, jobDesk, status, password } = req.body;
+        const defaultProfilePhotoPath = '../../assets/perfil.jpg';
+        const hashedPassword = await bcrypt_1.default.hash(password, 10);
+        const userWithDefaultPhoto = {
+            name,
+            email,
+            contact,
+            joinDate,
+            jobDesk,
+            status,
+            password: hashedPassword,
+            profilePhoto: defaultProfilePhotoPath,
+        };
+        await UserService_1.userService.createUser(userWithDefaultPhoto);
+        res.status(201).json({ message: 'Usuario creado con éxito', data: { ...userWithDefaultPhoto, password: undefined } });
     }
     catch (error) {
-        handleErrors(res, error);
+        console.error('Error en createUserController:', error);
+        res.status(500).json({ message: 'Error al crear el usuario' });
     }
 };
 exports.createUserController = createUserController;
@@ -154,10 +165,10 @@ const updateUserController = async (req, res) => {
     try {
         const id = req.params.id;
         const updatedUser = req.body;
-        const { error } = UserValidator_1.validateUserUpdate.validate(updatedUser);
-        if (error) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
+        // const { error } = validateUserUpdate.validate(updatedUser);
+        // if (error) {
+        //     return res.status(400).json({ message: error.details[0].message });
+        // }
         await UserService_1.userService.updateUser(id, updatedUser);
         res.status(200).json({ message: 'Usuario actualizado con éxito' });
     }
