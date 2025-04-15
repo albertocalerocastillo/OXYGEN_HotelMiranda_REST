@@ -1,0 +1,108 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.userService = void 0;
+const db_1 = require("../../db");
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const uuid_1 = require("uuid");
+class UserService {
+    async getUsers() {
+        try {
+            const connection = await (0, db_1.connect)();
+            const [rows] = await connection.execute('SELECT id, name, email, jobDesk, contact, status, profilePhoto, password, joinDate FROM users');
+            connection.release();
+            return rows;
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al obtener los usuarios: ' + error.message);
+            }
+            else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al obtener los usuarios: Ha ocurrido un error inesperado');
+            }
+        }
+    }
+    async getUser(id) {
+        try {
+            const connection = await (0, db_1.connect)();
+            const [rows] = await connection.execute('SELECT id, name, email, jobDesk, contact, status, profilePhoto, password, joinDate FROM users WHERE id = ?', [id]);
+            connection.release();
+            return rows.length > 0 ? rows[0] : null;
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al obtener el usuario: ' + error.message);
+            }
+            else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al obtener el usuario: Ha ocurrido un error inesperado');
+            }
+        }
+    }
+    async createUser(user) {
+        try {
+            if (!user.password) {
+                throw new Error('La contraseña del usuario no está definida');
+            }
+            const hashedPassword = await bcrypt_1.default.hash(user.password, 10);
+            const connection = await (0, db_1.connect)();
+            const id = (0, uuid_1.v4)();
+            const { name, email, jobDesk, contact, status, profilePhoto, joinDate } = user;
+            const [result] = await connection.execute('INSERT INTO users (id, name, email, password, jobDesk, contact, status, profilePhoto, joinDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, name, email, hashedPassword, jobDesk, contact, status, profilePhoto, joinDate]);
+            connection.release();
+            return { id, ...user, password: hashedPassword };
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al crear el usuario: ' + error.message);
+            }
+            else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al crear el usuario: Ha ocurrido un error inesperado');
+            }
+        }
+    }
+    async updateUser(id, updatedUser) {
+        try {
+            const connection = await (0, db_1.connect)();
+            const { name, email, jobDesk, contact, status, profilePhoto, joinDate } = updatedUser;
+            await connection.execute('UPDATE users SET name = ?, email = ?, jobDesk = ?, contact = ?, status = ?, profilePhoto = ?, joinDate = ? WHERE id = ?', [name, email, jobDesk, contact, status, profilePhoto, joinDate, id]);
+            connection.release();
+            return updatedUser;
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al actualizar el usuario: ' + error.message);
+            }
+            else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al actualizar el usuario: Ha ocurrido un error inesperado');
+            }
+        }
+    }
+    async deleteUser(id) {
+        try {
+            const connection = await (0, db_1.connect)();
+            await connection.execute('DELETE FROM users WHERE id = ?', [id]);
+            connection.release();
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw new Error('Error al eliminar el usuario: ' + error.message);
+            }
+            else {
+                console.error('Error desconocido:', error);
+                throw new Error('Error al eliminar el usuario: Ha ocurrido un error inesperado');
+            }
+        }
+    }
+}
+exports.userService = new UserService();
