@@ -36,8 +36,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.handler = void 0;
 const express_1 = __importDefault(require("express"));
-const database_1 = require("../database");
 const RoomsController_1 = require("./controllers/RoomsController");
 const BookingsController_1 = require("./controllers/BookingsController");
 const ContactController_1 = require("./controllers/ContactController");
@@ -48,6 +48,7 @@ const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const dotenv = __importStar(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
+const serverless_http_1 = __importDefault(require("serverless-http"));
 dotenv.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3001;
@@ -150,13 +151,13 @@ app.get('/', (req, res) => {
     };
     res.json(hotelData);
 });
-(0, database_1.connectDB)()
-    .then(() => {
-    app.listen(port, () => {
-        console.log(`Servidor escuchando en el puerto ${port}`);
-    });
-})
-    .catch((error) => {
-    console.error('Error al iniciar el servidor:', error);
-});
-exports.default = app;
+// connectDB()
+//     .then(() => {
+//         app.listen(port, () => {
+//             console.log(`Servidor escuchando en el puerto ${port}`);
+//         });
+//     })
+//     .catch((error) => {
+//         console.error('Error al iniciar el servidor:', error);
+//     });
+exports.handler = (0, serverless_http_1.default)(app);

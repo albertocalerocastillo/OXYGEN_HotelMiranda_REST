@@ -10,6 +10,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
+import serverless from 'serverless-http';
 
 dotenv.config();
 
@@ -122,14 +123,14 @@ app.get('/', (req: Request, res: Response) => {
     res.json(hotelData);
 });
 
-connectDB()
-    .then(() => {
-        app.listen(port, () => {
-            console.log(`Servidor escuchando en el puerto ${port}`);
-        });
-    })
-    .catch((error) => {
-        console.error('Error al iniciar el servidor:', error);
-    });
+// connectDB()
+//     .then(() => {
+//         app.listen(port, () => {
+//             console.log(`Servidor escuchando en el puerto ${port}`);
+//         });
+//     })
+//     .catch((error) => {
+//         console.error('Error al iniciar el servidor:', error);
+//     });
 
-export default app;
+export const handler = serverless(app);
