@@ -36,7 +36,7 @@ El repositorio recoge la evolución de los cuatro sprints de backend, tarea a ta
 - **CRUD completo** de habitaciones, reservas y empleados; listado y archivado de mensajes de contacto.
 - **Relación Booking–Room**: las reservas guardan `roomId`; al listarlas se hace `INNER JOIN` con `rooms`, y al crear o editar una reserva se comprueba que la habitación existe.
 - **Login con JWT**: `POST /login` valida contra un usuario de demostración y devuelve un token firmado (caduca en 1 h) y el nombre.
-- **Middleware de autenticación** (`src/middleware/auth.ts`): lee `Authorization: Bearer`, verifica el JWT y comprueba en MySQL que el usuario existe.
+- **Middleware de autenticación** (`src/middleware/auth.ts`): lee `Authorization: Bearer`, verifica el JWT y protege todas las rutas salvo `/login`, `/` y `/api-docs` (sin token o con token no válido, responde 401).
 - **Contraseñas con bcrypt** al crear empleados; la respuesta de creación no devuelve el hash.
 - **Validación con Joi** al crear reservas (campos obligatorios y tipos).
 - **Valores por defecto** al crear habitaciones (foto, estado `Available`, oferta `NO`...).
@@ -87,25 +87,23 @@ Base local: `http://localhost:3001`. Documentación interactiva: **`/api-docs`**
 | --- | --- | --- | --- |
 | `GET` | `/` | Nombre del hotel y lista de endpoints | No |
 | `POST` | `/login` | Recibe `{ email, password }` y devuelve `{ token, name }` | No |
-| `GET` | `/rooms` | Lista todas las habitaciones | Bearer* |
-| `GET` | `/rooms/:id` | Detalle de una habitación (404 si no existe) | Bearer* |
-| `POST` | `/rooms` | Crea una habitación (rellena valores por defecto) | Bearer* |
-| `PUT` | `/rooms/:id` | Actualiza una habitación | Bearer* |
-| `DELETE` | `/rooms/:id` | Elimina una habitación | Bearer* |
-| `GET` | `/bookings` | Lista reservas con datos de su habitación (JOIN) | Bearer* |
-| `GET` | `/bookings/:id` | Detalle de una reserva | Bearer* |
-| `POST` | `/bookings` | Crea una reserva (Joi + comprueba la habitación) | Bearer* |
-| `PUT` | `/bookings/:id` | Actualiza una reserva | Bearer* |
-| `DELETE` | `/bookings/:id` | Elimina una reserva | Bearer* |
-| `GET` | `/users` | Lista empleados | Bearer* |
-| `GET` | `/users/:id` | Detalle de un empleado | Bearer* |
-| `POST` | `/users` | Crea un empleado (contraseña con bcrypt) | Bearer* |
-| `PUT` | `/users/:id` | Actualiza un empleado | Bearer* |
-| `DELETE` | `/users/:id` | Elimina un empleado | Bearer* |
-| `GET` | `/contacts` | Lista mensajes de contacto | Bearer* |
-| `PUT` | `/contacts/:id/archive?archived=true\|false` | Archiva o desarchiva un mensaje | Bearer* |
-
-\* Rutas marcadas como privadas en el diseño de la API y el dashboard envía siempre el token, pero `authMiddleware` aún no está montado sobre los routers en `app.ts` (ver [Estado del proyecto](#estado-del-proyecto)).
+| `GET` | `/rooms` | Lista todas las habitaciones | Bearer |
+| `GET` | `/rooms/:id` | Detalle de una habitación (404 si no existe) | Bearer |
+| `POST` | `/rooms` | Crea una habitación (rellena valores por defecto) | Bearer |
+| `PUT` | `/rooms/:id` | Actualiza una habitación | Bearer |
+| `DELETE` | `/rooms/:id` | Elimina una habitación | Bearer |
+| `GET` | `/bookings` | Lista reservas con datos de su habitación (JOIN) | Bearer |
+| `GET` | `/bookings/:id` | Detalle de una reserva | Bearer |
+| `POST` | `/bookings` | Crea una reserva (Joi + comprueba la habitación) | Bearer |
+| `PUT` | `/bookings/:id` | Actualiza una reserva | Bearer |
+| `DELETE` | `/bookings/:id` | Elimina una reserva | Bearer |
+| `GET` | `/users` | Lista empleados | Bearer |
+| `GET` | `/users/:id` | Detalle de un empleado | Bearer |
+| `POST` | `/users` | Crea un empleado (contraseña con bcrypt) | Bearer |
+| `PUT` | `/users/:id` | Actualiza un empleado | Bearer |
+| `DELETE` | `/users/:id` | Elimina un empleado | Bearer |
+| `GET` | `/contacts` | Lista mensajes de contacto | Bearer |
+| `PUT` | `/contacts/:id/archive?archived=true\|false` | Archiva o desarchiva un mensaje | Bearer |
 
 ## Testing
 
@@ -163,7 +161,6 @@ El repositorio no incluye pipeline de despliegue: se ejecuta en local con `npm r
 
 Puntos conocidos, pendientes de cerrar:
 
-- `authMiddleware` está implementado pero no aplicado a `/rooms`, `/bookings`, `/users` ni `/contacts`.
 - La configuración de Swagger apunta a nombres de archivo antiguos (`rooms.controller.ts`...), así que `/api-docs` carga la interfaz pero no las rutas anotadas en los controladores actuales.
 - El login compara con un usuario de demostración fijo en lugar de consultar la tabla `users`.
 - La suite de tests necesita la configuración de Jest para TypeScript descrita arriba.

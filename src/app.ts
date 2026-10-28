@@ -104,10 +104,10 @@ app.use(express.json());
 app.use(cors());
 
 app.post('/login', login);
-app.use('/rooms', roomRoutes);
-app.use('/bookings', bookingRoutes);
-app.use('/contacts', contactRoutes);
-app.use('/users', userRoutes);
+app.use('/rooms', authMiddleware, roomRoutes);
+app.use('/bookings', authMiddleware, bookingRoutes);
+app.use('/contacts', authMiddleware, contactRoutes);
+app.use('/users', authMiddleware, userRoutes);
 
 app.get('/', (req: Request, res: Response) => {
     const hotelData = {
