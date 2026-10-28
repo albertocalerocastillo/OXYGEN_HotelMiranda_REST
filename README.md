@@ -4,7 +4,7 @@
 
 **API en Node.js + Express + TypeScript que da servicio al dashboard de Hotel Miranda: habitaciones, reservas, empleados, mensajes de contacto y login con JWT.**
 
-Proyecto del bootcamp Full Stack de OXYGEN Academy · Sprint 6, 7, 8 y 9 (Node y Express)
+Proyecto del Training React Full Stack de OXYGEN · Sprint 6, 7, 8 y 9 (Node y Express)
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)
 ![Express](https://img.shields.io/badge/Express_4-000000?style=flat-square&logo=express&logoColor=white)
@@ -182,6 +182,6 @@ Puntos conocidos, pendientes de cerrar:
 
 **Proyecto relacionado**: [Hotel Miranda · Dashboard](https://github.com/albertocalerocastillo/OXYGEN_HotelMiranda_Dashboard), el panel en React + Redux que consume esta API.
 
-Hecho por [Alberto Calero](https://github.com/albertocalerocastillo) durante el bootcamp Full Stack de OXYGEN Academy.
+Hecho por [Alberto Calero](https://github.com/albertocalerocastillo) durante el Training React Full Stack de OXYGEN.
 
 </div>
